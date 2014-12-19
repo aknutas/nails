@@ -181,6 +181,7 @@ ggplot(authorsPop, aes(AuthorFullName, Freq)) +
     xlab("Author") + 
     ylab("Number of articles")
 ```
+
 Sorted by number of articles published.
 
 ```{r,echo=FALSE}
@@ -190,6 +191,7 @@ ggplot(top25Authorsdf, aes(AuthorFullName, TimesCited)) +
     ggtitle("Citations of top 25\nmost cited authors") + 
     xlab("Author") + ylab("Times cited")
 ```
+
 Sorted by total number of citations.
 
 ## Important publications
@@ -227,6 +229,7 @@ ggplot(head(publications, 25), aes(Publication, Count)) +
     xlab("Publication") + 
     ylab("Article count")
 ```
+
 Sorted by number of published articles in the dataset.
 
 ```{r,echo=FALSE, fig.width=10, fig.height=7}
@@ -239,6 +242,7 @@ ggplot(top25Lit,
     ggtitle("Top 25\nmost cited publications") + 
     xlab("Publication") + ylab("Times cited")
 ```
+
 Sorted by the total number of citations.
 
 ## Important keywords
@@ -281,6 +285,7 @@ ggplot(keywordsPop, aes(AuthorKeywords, Freq)) +
     xlab("Keyword") + 
     ylab("Number of occurences")
 ```
+
 Sorted by number of articles where the keyword is mentioned.
 
 ```{r,echo=FALSE}
@@ -290,6 +295,7 @@ ggplot(top25keywordsdf, aes(AuthorKeywords, TimesCited)) +
     ggtitle("Citations of top 25 most cited keywords") + 
     xlab("Keyword") + ylab("Times cited")
 ```
+
 Sorted by total number of citations for the keyword.
 
 ## Most cited papers within the dataset
