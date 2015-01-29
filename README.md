@@ -28,3 +28,5 @@ create visualizations. The results are saved as a HTML-file exploration.html.
 The script also creates node and edge tables for author and citation 
 networks that can be loaded to Gephi for further exploration.  
 
+See further instructions for manual usage at https://sites.google.com/site/bibliometricdatavisualization/home
+
