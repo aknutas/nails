@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="nails : Network Analysis Interface for Literature Studies">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>nails</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/aknutas/nails">View on GitHub</a>
+
+          <h1 id="project_title">nails</h1>
+          <h2 id="project_tagline">Network Analysis Interface for Literature Studies</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/aknutas/nails/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/aknutas/nails/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="nails" class="anchor" href="#nails" aria-hidden="true"><span class="octicon octicon-link"></span></a>nails</h1>
+
+<p><strong>Network Analysis Interface for Literature Studies</strong><br>
+by <em>Juho Salminen, Arash Hajikhani and Antti Knutas</em><br>
+at <em>Lappeenranta University of Technology</em></p>
+
+<h2>
+<a id="what-is-it" class="anchor" href="#what-is-it" aria-hidden="true"><span class="octicon octicon-link"></span></a>What Is It?</h2>
+
+<p>This site shares our experiments and tools for performing Social Network Analysis (SNA) on citation data. As the amount of publications grows on any given field, automatic tools for this sort of analysis are becoming increasingly important prior to starting research on new fields.</p>
+
+<p>SNA is an interesting way for researchers to map large datasets and get insights from new angles. The steps for downloading data from Web of Knowledge and using our tools to process it are detailed below. The set of tools which are required to perform the analyses are free and need a minimum amount of installation. Furthermore, we will soon make a web-based analysis server HAMMER available so that you can process the data without needing to do any installation or manual processing steps.</p>
+
+<p>The project files are available as open source here in our Github repository.</p>
+
+<h2>
+<a id="how-to-use" class="anchor" href="#how-to-use" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to Use</h2>
+
+<p>These scripts can be used to complete an exploratory literature review
+using data downloaded from Web of Knowledge.</p>
+
+<ol>
+<li>Go to Web of Knowledge website and select Web of Science Core Collection 
+from the dropdown menu. </li>
+<li>Search for literature.</li>
+<li>Download data. Select Save to Other File Formats from the dropdown menu, 
+enter the range of records (max 500 records for one download), and download 
+Full Record and Cited References. File format should be Tab-delimited (Win) or
+Tab-delimited (Mac). If you need more than 500 records, repeat the download.</li>
+<li>Put the downloaded files into the input folder.</li>
+<li>Open exploration.Rmd with RStudio and press Knit HTML -button. 
+The script will combine the downloaded data into a single file, process it and
+create visualizations. The results are saved as a HTML-file exploration.html.</li>
+</ol>
+
+<p>The script also creates node and edge tables for author and citation 
+networks that can be loaded to Gephi for further exploration.  </p>
+
+<p>See further instructions for data gathering from Web of Knowledge and manual processing steps at <a href="https://sites.google.com/site/bibliometricdatavisualization/home">https://sites.google.com/site/bibliometricdatavisualization/home</a></p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">nails maintained by <a href="https://github.com/aknutas">aknutas</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
