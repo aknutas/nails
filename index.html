@@ -35,42 +35,57 @@
 <a id="nails" class="anchor" href="#nails" aria-hidden="true"><span class="octicon octicon-link"></span></a>nails</h1>
 
 <p><strong>Network Analysis Interface for Literature Studies</strong><br>
-by <em>Juho Salminen, Arash Hajikhani and Antti Knutas</em><br>
+by <em><a href="https://twitter.com/Juho_Salminen">Juho Salminen</a>, <a href="https://twitter.com/arash_hajikhani">Arash Hajikhani</a> and <a href="https://twitter.com/aknutas">Antti Knutas</a></em><br>
 at <em>Lappeenranta University of Technology</em></p>
 
 <h2>
 <a id="what-is-it" class="anchor" href="#what-is-it" aria-hidden="true"><span class="octicon octicon-link"></span></a>What Is It?</h2>
 
-<p>This site shares our experiments and tools for performing Social Network Analysis (SNA) on citation data. As the amount of publications grows on any given field, automatic tools for this sort of analysis are becoming increasingly important prior to starting research on new fields.</p>
+<p>This site shares our experiments and tools for performing statistical and Social Network Analysis (SNA) on citation data. SNA is a new way for researchers to map large datasets and get insights from new angles by analysing connections between articles. As the amount of publications grows on any given field, automatic tools for this sort of analysis are becoming increasingly important prior to starting research on new fields. <em>nails</em> also provides useful data when performing systematic mapping studies in scientific literature.</p>
 
-<p>SNA is an interesting way for researchers to map large datasets and get insights from new angles. The steps for downloading data from Web of Knowledge and using our tools to process it are detailed below. The set of tools which are required to perform the analyses are free and need a minimum amount of installation. Furthermore, we will soon make a web-based analysis server HAMMER available so that you can process the data without needing to do any installation or manual processing steps.</p>
+<p>The steps for downloading data from <a href="http://webofknowledge.com/">Web of Knowledge</a> and using our tools to process it are detailed below. The set of tools which are required to perform the analyses are free and need a minimum amount of installation. Furthermore, a web-based analysis server <a href="http://ct100020vir6.pc.lut.fi:3000/">HAMMER</a> is available for your use so that you can process the data without needing to do any installation or manual processing steps. Please see further information in the <em>How to Use</em> section below.</p>
 
 <p>The project files are available as open source here in our <a href="https://github.com/aknutas/nails">Github repository</a>. If you link or refer to us, please link to our <a href="http://aknutas.github.io/nails/">project page</a>.</p>
+
+<h3>
+<a id="systematic-mapping-studies" class="anchor" href="#systematic-mapping-studies" aria-hidden="true"><span class="octicon octicon-link"></span></a>Systematic Mapping Studies</h3>
+
+<p>A <a href="http://ewic.bcs.org/content/ConWebDoc/19543">systematic mapping study</a> (SMS) is a secondary study that aims at classification and thematic analysis of earlier research. The SMS is more general in search terms and aims at classifying and structuring the field of research, while the target of systematic literature review is to summarise and evaluate the research results. According to <a href="http://www.elsevier.com/__data/promis_misc/525444systematicreviewsguide.pdf">Kitchenham and Charters</a> performing a SMS can be especially suitable if few literature reviews have been done on the topic and there is a need to get a general overview of the field of interest. Both kinds of studies can be used to identify research gaps in the current state of research.</p>
 
 <h2>
 <a id="how-to-use" class="anchor" href="#how-to-use" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to Use</h2>
 
-<p>These scripts can be used to complete an exploratory literature review
-using data downloaded from Web of Knowledge.</p>
+<p>These scripts can be used to complete an exploratory literature review using data downloaded from Web of Knowledge.</p>
+
+<h3>
+<a id="manually" class="anchor" href="#manually" aria-hidden="true"><span class="octicon octicon-link"></span></a>Manually</h3>
+
+<p>You can download, install and use our scripts directly. See steps below.</p>
 
 <ol>
-<li>Go to Web of Knowledge website and select Web of Science Core Collection 
-from the dropdown menu. </li>
+<li>Go to Web of Knowledge <a href="http://webofknowledge.com/">website</a> and select the Web of Science Core Collection from the dropdown menu. </li>
 <li>Search for literature.</li>
-<li>Download data. Select Save to Other File Formats from the dropdown menu, 
-enter the range of records (max 500 records for one download), and download 
-Full Record and Cited References. File format should be Tab-delimited (Win) or
-Tab-delimited (Mac). If you need more than 500 records, repeat the download.</li>
+<li>Download data. Select Save to Other File Formats from the dropdown menu, enter the range of records (max 500 records for one download), and download Full Record and Cited References. File format should be Tab-delimited (Win) or Tab-delimited (Mac). If you need more than 500 records, repeat the download.</li>
 <li>Put the downloaded files into the input folder.</li>
-<li>Open exploration.Rmd with RStudio and press Knit HTML -button. 
-The script will combine the downloaded data into a single file, process it and
-create visualizations. The results are saved as a HTML-file exploration.html.</li>
+<li>Open exploration.Rmd with RStudio and press Knit HTML -button. The script will combine the downloaded data into a single file, process it and create visualizations. The results are saved as a HTML-file exploration.html.</li>
 </ol>
 
-<p>The script also creates node and edge tables for author and citation 
-networks that can be loaded to Gephi for further exploration.  </p>
+<p>See detailed instructions instructions with screenshots for manual processing steps and installation at <a href="https://sites.google.com/site/bibliometricdatavisualization/instructions">https://sites.google.com/site/bibliometricdatavisualization/instructions</a></p>
 
-<p>See further instructions for data gathering from Web of Knowledge and manual processing steps at <a href="https://sites.google.com/site/bibliometricdatavisualization/instructions">https://sites.google.com/site/bibliometricdatavisualization/instructions</a></p>
+<h3>
+<a id="using-the-online-analysis-server" class="anchor" href="#using-the-online-analysis-server" aria-hidden="true"><span class="octicon octicon-link"></span></a>Using the Online Analysis Server</h3>
+
+<p><em>Alternatively</em> you can upload files to <a href="http://ct100020vir6.pc.lut.fi:3000/">our online analysis server</a>. The service is in early beta testing so we appreciate reporting of issues to the <a href="https://github.com/aknutas/nails/issues">project issues page</a> or as a private Twitter message to <a href="https://twitter.com/aknutas">@aknutas</a>.</p>
+
+<ol>
+<li>Go to Web of Knowledge <a href="http://webofknowledge.com/">website</a> and select the Web of Science Core Collection from the dropdown menu. </li>
+<li>Search for literature.</li>
+<li>Download data. Select Save to Other File Formats from the dropdown menu, enter the range of records (max 500 records for one download), and download Full Record and Cited References. File format should be Tab-delimited (Win) or Tab-delimited (Mac). If you need more than 500 records, repeat the download.</li>
+<li>Compress the resulting files into a single ZIP archive and upload them to the <a href="http://ct100020vir6.pc.lut.fi:3000/">online analysis server</a>.</li>
+<li>Download the results from the web page after the server has processed through the queue.</li>
+</ol>
+
+<p>The script also creates node and edge tables for author and citation networks that can be loaded to Gephi for further exploration.  </p>
       </section>
     </div>
 
@@ -82,7 +97,17 @@ networks that can be loaded to Gephi for further exploration.  </p>
       </footer>
     </div>
 
-    
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-61880893-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
 
   </body>
 </html>
