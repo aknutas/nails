@@ -25,20 +25,26 @@ rm(literature)
 # Load files in the input folder and merge into a single file
 for (file in filelist) {
     if (!exists("literature")) {
-        literature <- read.delim2(file, header = T, 
+        literature <- read.delim2(file, header = F, 
                                   fileEncoding = "UTF-16", row.names = NULL, 
                                   quote = "")
-        data.names <- names(literature)[2:length(names(literature))]
-        literature <- literature[, 1:(ncol(literature) - 1)]
-        names(literature) <- data.names
+        header <- as.vector(t(literature[1,]))
+        header[61:62] <- c("XX", "ZZ")
+        names(literature) <- header
+        literature <- literature[-1, ]
+        #data.names <- names(literature)[2:length(names(literature))]
+        #literature <- literature[, 1:(ncol(literature) - 1)]
+        #names(literature) <- data.names
     }
     else {
         literature2 <- read.delim2(file, header = T, 
                                    fileEncoding = "UTF-16", row.names = NULL, 
                                    quote = "")
-        data.names <- names(literature2)[2:length(names(literature2))]
-        literature2 <- literature2[, 1:(ncol(literature2) - 1)]
-        names(literature2) <- data.names
+        literature2 <- literature2[-1, ]
+        names(literature2) <- header
+        #data.names <- names(literature2)[2:length(names(literature2))]
+        #literature2 <- literature2[, 1:(ncol(literature2) - 1)]
+        #names(literature2) <- data.names
         literature <- rbind(literature, literature2)
     }
 }
@@ -53,10 +59,9 @@ literature = cbind(ids, literature)
 # Cleaning data
 
 # Fix variable names
-names(literature)[22] <- "ID"
 tags <- names(literature)
 fields <- as.character(fieldtags$field[match(tags, fieldtags$tag)])
-fields[is.na(fields)] <- tags     # Throws warnings but seems to be working
+fields[is.na(fields)] <- tags[is.na(fields)]     # Throws warnings but seems to be working
 fields <- gsub(" ", "", fields)
 names(literature) <- fields
 names(literature)[22] <- "KeywordsPlus"
@@ -95,6 +100,7 @@ literature$CitedReferences <- gsub("'", "", literature$CitedReferences)
 literature$CitedReferences <- gsub('"', "", literature$CitedReferences)
 literature$CitedReferences <- toupper(literature$CitedReferences)
 literature$CitedReferences <- gsub("DOI DOI", "DOI", literature$CitedReferences)
+literature$TimesCited <- as.numeric(as.character(literature$TimesCited))
 
 literature$DOI <- toupper(literature$DOI)
 # Creating reference strings
