@@ -25,26 +25,23 @@ rm(literature)
 # Load files in the input folder and merge into a single file
 for (file in filelist) {
     if (!exists("literature")) {
-        literature <- read.delim2(file, header = F, 
+        literature <- read.delim2(file, header = T, 
                                   fileEncoding = "UTF-16", row.names = NULL, 
                                   quote = "")
-        header <- as.vector(t(literature[1,]))
-        header[61:62] <- c("XX", "ZZ")
-        names(literature) <- header
-        literature <- literature[-1, ]
-        #data.names <- names(literature)[2:length(names(literature))]
-        #literature <- literature[, 1:(ncol(literature) - 1)]
-        #names(literature) <- data.names
+        # Fix misplaced column names
+        data.names <- names(literature)[2:length(names(literature))]
+        literature <- literature[, 1:(ncol(literature) - 1)]
+        names(literature) <- data.names
     }
     else {
         literature2 <- read.delim2(file, header = T, 
                                    fileEncoding = "UTF-16", row.names = NULL, 
                                    quote = "")
-        literature2 <- literature2[-1, ]
-        names(literature2) <- header
-        #data.names <- names(literature2)[2:length(names(literature2))]
-        #literature2 <- literature2[, 1:(ncol(literature2) - 1)]
-        #names(literature2) <- data.names
+        # Fix misplaced column names
+        data.names <- names(literature2)[2:length(names(literature2))]
+        literature2 <- literature2[, 1:(ncol(literature2) - 1)]
+        names(literature2) <- data.names
+        # Merge data
         literature <- rbind(literature, literature2)
     }
 }
