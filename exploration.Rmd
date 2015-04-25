@@ -7,6 +7,7 @@ output: html_document
 # Loading libraries
 library(ggplot2)
 library(splitstackshape)
+library(igraph)
 
 # Set ggplot theme
 theme_set(theme_minimal(15))
@@ -268,9 +269,10 @@ ggplot(top25keywordsdf, aes(AuthorKeywords, TimesCited)) +
 
 Sorted by total number of citations for the keyword.
 
-## Most cited papers within the dataset
+## The most important papers
+The most important papers and other sources are identified below using several importance measures.
 
-### The most cited articles:
+### The most cited articles in Web of Science Core Collection:
 
 ```{r, echo=FALSE}
 # Sort literature by TimesCited in decreasing order and display top 10
@@ -281,8 +283,7 @@ names(mostCited)[62] <- "FullReference"
 mostCited[, c("FullReference", "TimesCited")]
 ```
 
-
-### Included in the dataset
+### The most cited articles within the dataset
 The papers that the analyzed literature references most often. These papers are included in the dataset.
 ```{r,echo=FALSE}
 # Calculate the number of citations for each reference
@@ -303,18 +304,52 @@ citations <- citations[with (citations, order(-TotalTimesCited)), ]
 citationsLit <- citationsLit[with (citationsLit, order(-TotalTimesCited)), ]
 citationsRef <- citationsRef[with (citationsRef, order(-TotalTimesCited)), ]
 
+# Trim FullReference to 100 characters
 citationsLit$FullReference <- strtrim(citationsLit$FullReference, 100)
 citationsRef$FullReference <- strtrim(citationsRef$FullReference, 100)
-
 
 # Display the top 25 of most cited references included in the dataset 
 head(citationsLit[, c("FullReference", "TotalTimesCited")], 25)
 ```
 
-### NOT included in the dataset
+### The most cited references NOT found in Web of Science Core Collection
 The papers that the analyzed literature references most often. These papers are not included in the dataset and might warrant inclusion.
 ```{r,echo=FALSE}
 
 # Display the top 25 of most cited references not included in the dataset 
 head(citationsRef[, c("FullReference", "TotalTimesCited")], 25)
 ```
+
+### The articles with highest PageRank scores
+PageRank score calculated within the citation network of the dateset.
+```{r,echo=FALSE}
+# Create igraph
+citationGraph <- graph.data.frame(citationEdges, vertices = citationNodes)
+# Calculate PageRanks
+citationNodes$PageRank <- page.rank(citationGraph)$vector
+
+# Extract the articles included in the data set and articles not included
+# in the dataset
+citationsLit <- citationNodes[citationNodes$Origin == "literature", ]
+citationsRef <- citationNodes[citationNodes$Origin == "reference", ]
+
+# Order by TotalTimesCited, decreasing order
+citationsLit <- citationsLit[with (citationsLit, order(-PageRank)), ]
+citationsRef <- citationsRef[with (citationsRef, order(-PageRank)), ]
+
+# Trim FullReference to 100 characters
+citationsLit$FullReference <- strtrim(citationsLit$FullReference, 100)
+citationsRef$FullReference <- strtrim(citationsRef$FullReference, 100)
+
+# Display the top 25 papers with highest PageRank included in the dataset 
+head(citationsLit[, c("FullReference", "PageRank")], 25)
+```
+
+### The references with highest PageRank scores NOT found on Web of Knowledge
+PageRank score calculated within the citation network of the dateset.
+```{r,echo=FALSE}
+# Display the top 25 of most cited references not included in the dataset 
+head(citationsRef[, c("FullReference", "PageRank")], 25)
+```
+
+
