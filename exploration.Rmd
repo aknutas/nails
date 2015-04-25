@@ -99,15 +99,6 @@ qplot(data = literature, TimesCited, binwidth = 1, fill = I("red")) +
 summary(literature$TimesCited)
 ```
 
-### 10 most cited articles:
-Notice the possible outliers not shown in the previous figure.
-```{r, echo=FALSE}
-# Sort literature by TimesCited in decreasing order and display top 10
-options(width = 140)
-mostCited <- head(literature[with (literature, order(-TimesCited)), ], 10)
-mostCited$ReferenceString <- strtrim(mostCited$ReferenceString, 100)
-mostCited[, c("ReferenceString", "TimesCited")]
-```
 
 
 ## Important authors
@@ -279,6 +270,19 @@ ggplot(top25keywordsdf, aes(AuthorKeywords, TimesCited)) +
 Sorted by total number of citations for the keyword.
 
 ## Most cited papers within the dataset
+
+### The most cited articles:
+
+```{r, echo=FALSE}
+# Sort literature by TimesCited in decreasing order and display top 10
+options(width = 140)
+mostCited <- head(literature[with (literature, order(-TimesCited)), ], 25)
+mostCited$ReferenceString <- strtrim(mostCited$ReferenceString, 100)
+names(mostCited)[62] <- "FullReference"
+mostCited[, c("FullReference", "TimesCited")]
+```
+
+
 ```{r,echo=FALSE}
 # Calculate and display ratios of papers and references with DOIs
 
