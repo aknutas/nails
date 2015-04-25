@@ -68,12 +68,6 @@ dims <- dim(literature)
 cat("Data consist of", dims[1], "observations of", dims[2], "variables.")
 ```
 
-### Variable names
-```{r,echo=FALSE}
-names(literature)
-```
-
-
 ## Distribution of publication years 
 ```{r, echo=FALSE}
 qplot(data = literature, YearPublished, fill = I("darkgreen"), binwidht = 1) + 
@@ -99,8 +93,6 @@ qplot(data = literature, TimesCited, binwidth = 1, fill = I("red")) +
 
 summary(literature$TimesCited)
 ```
-
-
 
 ## Important authors
 ```{r,echo=FALSE, fig.height=7}
@@ -272,8 +264,8 @@ Sorted by total number of citations for the keyword.
 ## The most important papers
 The most important papers and other sources are identified below using several importance measures.
 
-### The most cited articles in Web of Science Core Collection:
-
+### The most cited articles
+Total citation counts according to Web of Science.
 ```{r, echo=FALSE}
 # Sort literature by TimesCited in decreasing order and display top 10
 options(width = 140)
@@ -312,7 +304,7 @@ citationsRef$FullReference <- strtrim(citationsRef$FullReference, 100)
 head(citationsLit[, c("FullReference", "TotalTimesCited")], 25)
 ```
 
-### The most cited references NOT found in Web of Science Core Collection
+### The most cited references NOT found in the dataset
 The papers that the analyzed literature references most often. These papers are not included in the dataset and might warrant inclusion.
 ```{r,echo=FALSE}
 
@@ -347,7 +339,7 @@ citationsRef <- citationsRef[with (citationsRef, order(-PageRank)), ]
 head(citationsLit[, c("FullReference", "PageRank")], 25)
 ```
 
-### The references with the highest PageRank scores NOT found on Web of Science Core Collection
+### The references with the highest PageRank scores NOT found in the dataset
 PageRank score calculated within the citation network of the dateset.
 ```{r,echo=FALSE}
 # Display the top 25 papers with highest PageRank not included in the dataset 
@@ -363,7 +355,7 @@ citationsRef <- citationsRef[with (citationsRef, order(-EigenvectorCentrality)),
 head(citationsLit[, c("FullReference", "EigenvectorCentrality")], 25)
 ```
 
-### The references with the highest eigenvector centralities NOT found on the Web of Science Core Collection
+### The references with the highest eigenvector centralities NOT found in the dataset
 ```{r,echo=FALSE}
 # Display the top 25 papers with highest eigenvector centrality not included in the dataset 
 head(citationsRef[, c("FullReference", "EigenvectorCentrality")], 25)
