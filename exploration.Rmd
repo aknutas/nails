@@ -193,7 +193,7 @@ top25Lit <- transform(top25Lit,
             PublicationName = reorder(PublicationName, PublicationTotalCitations))
 
 ggplot(head(publications, 25), aes(Publication, Count)) + 
-    geom_bar(stat = "identity", aes(fill = Publication)) + 
+    geom_bar(stat = "identity", fill = "orange") + 
     coord_flip() + 
     theme(legend.position = "none") +
     ggtitle("Most popular publications") + 
@@ -205,9 +205,8 @@ Sorted by number of published articles in the dataset.
 
 ```{r,echo=FALSE, fig.width=10, fig.height=7}
 ggplot(top25Lit, 
-       aes(PublicationName, TimesCited, 
-           color = PublicationName, color = PublicationName)) + 
-    geom_boxplot() + 
+       aes(PublicationName, TimesCited)) + 
+    geom_boxplot(color = "orange") + 
     coord_flip() +
     theme(legend.position = "none") +
     ggtitle("Top 25\nmost cited publications") + 
