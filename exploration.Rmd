@@ -283,16 +283,6 @@ mostCited[, c("FullReference", "TimesCited")]
 ```
 
 
-```{r,echo=FALSE}
-# Calculate and display ratios of papers and references with DOIs
-
-DOIratio <- round((1 - sum(literature$DOI == "") / nrow(literature)) * 100, 2)
-references <- unlist(strsplit(literature$CitedReferences, ";"))
-refRatio <- round(nrow(citationEdges) / length(references), 2)
-cat(DOIratio, "% of papers and ", refRatio, "% of references contain DOIs.")
-```
-
-
 ### Included in the dataset
 The papers that the analyzed literature references most often. These papers are included in the dataset.
 ```{r,echo=FALSE}
