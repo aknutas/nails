@@ -327,29 +327,45 @@ PageRank score calculated within the citation network of the dateset.
 citationGraph <- graph.data.frame(citationEdges, vertices = citationNodes)
 # Calculate PageRanks
 citationNodes$PageRank <- page.rank(citationGraph)$vector
+# Calculate eigenvector centralities
+citationNodes$EigenvectorCentrality <- evcent(citationGraph, directed = TRUE)$vector
 
 # Extract the articles included in the data set and articles not included
 # in the dataset
 citationsLit <- citationNodes[citationNodes$Origin == "literature", ]
 citationsRef <- citationNodes[citationNodes$Origin == "reference", ]
 
-# Order by TotalTimesCited, decreasing order
-citationsLit <- citationsLit[with (citationsLit, order(-PageRank)), ]
-citationsRef <- citationsRef[with (citationsRef, order(-PageRank)), ]
-
 # Trim FullReference to 100 characters
 citationsLit$FullReference <- strtrim(citationsLit$FullReference, 100)
 citationsRef$FullReference <- strtrim(citationsRef$FullReference, 100)
+
+# Order by PageRank decreasing order
+citationsLit <- citationsLit[with (citationsLit, order(-PageRank)), ]
+citationsRef <- citationsRef[with (citationsRef, order(-PageRank)), ]
 
 # Display the top 25 papers with highest PageRank included in the dataset 
 head(citationsLit[, c("FullReference", "PageRank")], 25)
 ```
 
-### The references with highest PageRank scores NOT found on Web of Knowledge
+### The references with the highest PageRank scores NOT found on Web of Science Core Collection
 PageRank score calculated within the citation network of the dateset.
 ```{r,echo=FALSE}
-# Display the top 25 of most cited references not included in the dataset 
+# Display the top 25 papers with highest PageRank not included in the dataset 
 head(citationsRef[, c("FullReference", "PageRank")], 25)
 ```
 
+### The articles with the highest eigenvector centralities
+```{r,echo=FALSE}
+# Order by eigenvector centrality, decreasing order
+citationsLit <- citationsLit[with (citationsLit, order(-EigenvectorCentrality)), ]
+citationsRef <- citationsRef[with (citationsRef, order(-EigenvectorCentrality)), ]
+# Display the top 25 papers with highest eigenvector centrality included in the dataset 
+head(citationsLit[, c("FullReference", "EigenvectorCentrality")], 25)
+```
+
+### The references with the highest eigenvector centralities NOT found on the Web of Science Core Collection
+```{r,echo=FALSE}
+# Display the top 25 papers with highest eigenvector centrality not included in the dataset 
+head(citationsRef[, c("FullReference", "EigenvectorCentrality")], 25)
+```
 
