@@ -13,8 +13,6 @@ theme_set(theme_minimal(15))
 ```
 
 
-
-
 ```{r, echo=FALSE, warning=FALSE, results='hide'}
 # Loading and preparing data
 
@@ -111,24 +109,6 @@ mostCited$ReferenceString <- strtrim(mostCited$ReferenceString, 100)
 mostCited[, c("ReferenceString", "TimesCited")]
 ```
 
-## Times cited by year published
-```{r,echo=FALSE}
-# Set x-axis labels manually
-# if range < 10, show all, otherwise every 5th year
-start <- min(literature$YearPublished, na.rm = T)
-end <- max(literature$YearPublished, na.rm = T)
-yearRange <- end - start
-steps <- 1
-if (yearRange > 10) {steps <- 5} 
-
-ggplot(literature, aes(YearPublished, TimesCited, 
-                       color = PublicationType)) + 
-    geom_point(position = "jitter", alpha = 1/5) + 
-    ggtitle("Citations by year published") + 
-    scale_x_continuous(breaks =  seq(start, end, steps)) +
-    xlab("Year") + 
-    ylab("Times cited")
-```
 
 ## Important authors
 ```{r,echo=FALSE, fig.height=7}
