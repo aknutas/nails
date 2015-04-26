@@ -44,6 +44,9 @@ literatureByAuthor$AuthorFullName <- as.character(literatureByAuthor$AuthorFullN
 literatureByKeywords$AuthorFullName <- as.character(literatureByKeywords$AuthorFullName)
 literatureByCategory$AuthorFullName <- as.character(literatureByCategory$AuthorFullName)
 
+literature$Abstract <- as.character(literature$Abstract)
+literature$DocumentTitle <- as.character(literature$DocumentTitle)
+
 literature$YearPublished <- as.numeric(as.character(literature$YearPublished))
 
 literature$CitedReferences <- as.character(literature$CitedReferences)
@@ -290,11 +293,11 @@ citationNodes$InDegree <- degree(citationGraph, mode = "in")
 # Extract the articles included in the data set and articles not included
 # in the dataset
 citationsLit <- citationNodes[citationNodes$Origin == "literature", ]
-citationsLit <- merge(citationsLit, literature[, c(1, 23, 62)], 
+citationsLit <- merge(citationsLit, literature[, c(2, 11, 23, 62)], 
                        by.x = "FullReference", by.y = "ReferenceString")
 citationsRef <- citationNodes[citationNodes$Origin == "reference", ]
 
-# Order by TotalTimesCited, decreasing order
+# Order by InDegree, decreasing order
 citationsLit <- citationsLit[with (citationsLit, order(-InDegree)), ]
 citationsRef <- citationsRef[with (citationsRef, order(-InDegree)), ]
 
@@ -344,5 +347,24 @@ head(citationsLit[, c("FullReference", "EigenvectorCentrality")], 25)
 ```{r,echo=FALSE}
 # Display the top 25 papers with highest eigenvector centrality not included in the dataset 
 head(citationsRef[, c("FullReference", "EigenvectorCentrality")], 25)
+```
+
+# Abstracts
+## Highest in-degree
+```{r,echo=FALSE}
+# Helper function for printing abstracts
+printAbstract <- function(df) {
+    title <- toupper(df[10])
+    abstract <- df[11]
+    cat(paste(title, "\n", abstract, "\n\n"))
+}
+citationsLit <- citationsLit[with (citationsLit, order(-InDegree)), ]
+apply(head(citationsLit, 10), 1, printAbstract)
+```
+
+# Highest PageRank
+```{r,echo=FALSE}
+citationsLit <- citationsLit[with (citationsLit, order(-PageRank)), ]
+apply(head(citationsLit, 10), 1, printAbstract)
 ```
 
