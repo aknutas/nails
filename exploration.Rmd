@@ -286,8 +286,6 @@ Literature in the dataset references these sources the most often. The following
 citationGraph <- graph.data.frame(citationEdges, vertices = citationNodes)
 # Calculate PageRanks
 citationNodes$PageRank <- page.rank(citationGraph)$vector
-# Calculate eigenvector centralities
-citationNodes$EigenvectorCentrality <- evcent(citationGraph, directed = TRUE)$vector
 # Calculate in-degrees
 citationNodes$InDegree <- degree(citationGraph, mode = "in")
 
@@ -335,28 +333,13 @@ PageRank score calculated within the citation network of the dateset.
 kable(head(citationsRef[, c("FullReference", "PageRank")], 25))
 ```
 
-### The articles with the highest eigenvector centralities
-```{r,echo=FALSE}
-# Order by eigenvector centrality, decreasing order
-citationsLit <- citationsLit[with (citationsLit, order(-EigenvectorCentrality)), ]
-citationsRef <- citationsRef[with (citationsRef, order(-EigenvectorCentrality)), ]
-# Display the top 25 papers with highest eigenvector centrality included in the dataset 
-kable(head(citationsLit[, c("FullReference", "EigenvectorCentrality")], 25))
-```
-
-### The references with the highest eigenvector centralities NOT found in the dataset
-```{r,echo=FALSE}
-# Display the top 25 papers with highest eigenvector centrality not included in the dataset 
-kable(head(citationsRef[, c("FullReference", "EigenvectorCentrality")], 25))
-```
-
 # Abstracts
 ## Highest in-degree
 ```{r,echo=FALSE}
 # Helper function for printing abstracts
 printAbstract <- function(df) {
-    title <- toupper(df[10])
-    abstract <- df[11]
+    title <- toupper(df[9])
+    abstract <- df[10]
     cat(paste(title, "\n", abstract, "\n\n"))
 }
 citationsLit <- citationsLit[with (citationsLit, order(-InDegree)), ]
