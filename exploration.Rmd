@@ -275,45 +275,8 @@ names(mostCited)[62] <- "FullReference"
 mostCited[, c("FullReference", "TimesCited")]
 ```
 
-### The most cited articles within the dataset
-The papers that the analyzed literature references most often. These papers are included in the dataset.
-```{r,echo=FALSE}
-# Calculate the number of citations for each reference
-citations <- table(citationEdges$Target)
-citations <- as.data.frame(citations)
-
-# Fix names and merge to citationNodes
-names(citations) <- c("Id", "TotalTimesCited")
-citations <- merge(citations, citationNodes, by = "Id")
-
-# Extract the articles included in the data set and articles not included
-# in the dataset
-citationsLit <- citations[citations$Origin == "literature", ]
-citationsRef <- citations[citations$Origin == "reference", ]
-
-# Order by TotalTimesCited, decreasing order
-citations <- citations[with (citations, order(-TotalTimesCited)), ]
-citationsLit <- citationsLit[with (citationsLit, order(-TotalTimesCited)), ]
-citationsRef <- citationsRef[with (citationsRef, order(-TotalTimesCited)), ]
-
-# Trim FullReference to 100 characters
-citationsLit$FullReference <- strtrim(citationsLit$FullReference, 100)
-citationsRef$FullReference <- strtrim(citationsRef$FullReference, 100)
-
-# Display the top 25 of most cited references included in the dataset 
-head(citationsLit[, c("FullReference", "TotalTimesCited")], 25)
-```
-
-### The most cited references NOT found in the dataset
-The papers that the analyzed literature references most often. These papers are not included in the dataset and might warrant inclusion.
-```{r,echo=FALSE}
-
-# Display the top 25 of most cited references not included in the dataset 
-head(citationsRef[, c("FullReference", "TotalTimesCited")], 25)
-```
-
-### The articles with highest PageRank scores
-PageRank score calculated within the citation network of the dateset.
+### The papers with the highest in-degree
+Literature in the dataset references these sources the most often. The following papers are included in the dataset.
 ```{r,echo=FALSE}
 # Create igraph
 citationGraph <- graph.data.frame(citationEdges, vertices = citationNodes)
@@ -321,16 +284,38 @@ citationGraph <- graph.data.frame(citationEdges, vertices = citationNodes)
 citationNodes$PageRank <- page.rank(citationGraph)$vector
 # Calculate eigenvector centralities
 citationNodes$EigenvectorCentrality <- evcent(citationGraph, directed = TRUE)$vector
+# Calculate in-degrees
+citationNodes$InDegree <- degree(citationGraph, mode = "in")
 
 # Extract the articles included in the data set and articles not included
 # in the dataset
 citationsLit <- citationNodes[citationNodes$Origin == "literature", ]
+citationsLit <- merge(citationsLit, literature[, c(1, 23, 62)], 
+                       by.x = "FullReference", by.y = "ReferenceString")
 citationsRef <- citationNodes[citationNodes$Origin == "reference", ]
+
+# Order by TotalTimesCited, decreasing order
+citationsLit <- citationsLit[with (citationsLit, order(-InDegree)), ]
+citationsRef <- citationsRef[with (citationsRef, order(-InDegree)), ]
 
 # Trim FullReference to 100 characters
 citationsLit$FullReference <- strtrim(citationsLit$FullReference, 100)
 citationsRef$FullReference <- strtrim(citationsRef$FullReference, 100)
 
+# Display the top 25 of most cited references included in the dataset 
+head(citationsLit[, c("FullReference", "InDegree")], 25)
+```
+
+### The references with the highest in-degree NOT found in the dataset
+Literature in the dataset references these sources the most often. These papers are not included in the dataset and might warrant inclusion.
+```{r,echo=FALSE}
+# Display the top 25 of most cited references not included in the dataset 
+head(citationsRef[, c("FullReference", "InDegree")], 25)
+```
+
+### The articles with highest PageRank scores
+PageRank score calculated within the citation network of the dateset.
+```{r,echo=FALSE}
 # Order by PageRank decreasing order
 citationsLit <- citationsLit[with (citationsLit, order(-PageRank)), ]
 citationsRef <- citationsRef[with (citationsRef, order(-PageRank)), ]
