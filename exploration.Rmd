@@ -8,6 +8,7 @@ output: html_document
 library(ggplot2)
 library(splitstackshape)
 library(igraph)
+library(knitr)
 
 # Set ggplot theme
 theme_set(theme_minimal(15))
@@ -275,7 +276,7 @@ options(width = 140)
 mostCited <- head(literature[with (literature, order(-TimesCited)), ], 25)
 mostCited$ReferenceString <- strtrim(mostCited$ReferenceString, 100)
 names(mostCited)[62] <- "FullReference"
-mostCited[, c("FullReference", "TimesCited")]
+kable(mostCited[, c("FullReference", "TimesCited")])
 ```
 
 ### The papers with the highest in-degree
@@ -306,14 +307,14 @@ citationsLit$FullReference <- strtrim(citationsLit$FullReference, 100)
 citationsRef$FullReference <- strtrim(citationsRef$FullReference, 100)
 
 # Display the top 25 of most cited references included in the dataset 
-head(citationsLit[, c("FullReference", "InDegree")], 25)
+kable(head(citationsLit[, c("FullReference", "InDegree")], 25))
 ```
 
 ### The references with the highest in-degree NOT found in the dataset
 Literature in the dataset references these sources the most often. These papers are not included in the dataset and might warrant inclusion.
 ```{r,echo=FALSE}
 # Display the top 25 of most cited references not included in the dataset 
-head(citationsRef[, c("FullReference", "InDegree")], 25)
+kable(head(citationsRef[, c("FullReference", "InDegree")], 25))
 ```
 
 ### The articles with highest PageRank scores
@@ -324,14 +325,14 @@ citationsLit <- citationsLit[with (citationsLit, order(-PageRank)), ]
 citationsRef <- citationsRef[with (citationsRef, order(-PageRank)), ]
 
 # Display the top 25 papers with highest PageRank included in the dataset 
-head(citationsLit[, c("FullReference", "PageRank")], 25)
+kable(head(citationsLit[, c("FullReference", "PageRank")], 25))
 ```
 
 ### The references with the highest PageRank scores NOT found in the dataset
 PageRank score calculated within the citation network of the dateset.
 ```{r,echo=FALSE}
 # Display the top 25 papers with highest PageRank not included in the dataset 
-head(citationsRef[, c("FullReference", "PageRank")], 25)
+kable(head(citationsRef[, c("FullReference", "PageRank")], 25))
 ```
 
 ### The articles with the highest eigenvector centralities
@@ -340,13 +341,13 @@ head(citationsRef[, c("FullReference", "PageRank")], 25)
 citationsLit <- citationsLit[with (citationsLit, order(-EigenvectorCentrality)), ]
 citationsRef <- citationsRef[with (citationsRef, order(-EigenvectorCentrality)), ]
 # Display the top 25 papers with highest eigenvector centrality included in the dataset 
-head(citationsLit[, c("FullReference", "EigenvectorCentrality")], 25)
+kable(head(citationsLit[, c("FullReference", "EigenvectorCentrality")], 25))
 ```
 
 ### The references with the highest eigenvector centralities NOT found in the dataset
 ```{r,echo=FALSE}
 # Display the top 25 papers with highest eigenvector centrality not included in the dataset 
-head(citationsRef[, c("FullReference", "EigenvectorCentrality")], 25)
+kable(head(citationsRef[, c("FullReference", "EigenvectorCentrality")], 25))
 ```
 
 # Abstracts
