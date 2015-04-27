@@ -270,17 +270,6 @@ The most important papers and other sources are identified below using several i
 
 ### The most cited articles
 Total citation counts according to Web of Science.
-```{r, echo=FALSE}
-# Sort literature by TimesCited in decreasing order and display top 10
-options(width = 140)
-mostCited <- head(literature[with (literature, order(-TimesCited)), ], 25)
-mostCited$ReferenceString <- strtrim(mostCited$ReferenceString, 100)
-names(mostCited)[62] <- "FullReference"
-kable(mostCited[, c("FullReference", "TimesCited")])
-```
-
-### The papers with the highest in-degree
-Literature in the dataset references these sources the most often. The following papers are included in the dataset.
 ```{r,echo=FALSE}
 # Create igraph
 citationGraph <- graph.data.frame(citationEdges, vertices = citationNodes)
@@ -292,21 +281,32 @@ citationNodes$InDegree <- degree(citationGraph, mode = "in")
 # Extract the articles included in the data set and articles not included
 # in the dataset
 citationsLit <- citationNodes[citationNodes$Origin == "literature", ]
-citationsLit <- merge(citationsLit, literature[, c(2, 11, 23, 62)], 
+citationsLit <- merge(citationsLit, literature[, c(2, 11, 23, 33, 62)], 
                        by.x = "FullReference", by.y = "ReferenceString")
+citationsLit$Article <- paste(toupper(citationsLit$DocumentTitle), " | ",
+                              citationsLit$FullReference, " | ", 
+                                      citationsLit$Abstract)
 citationsRef <- citationNodes[citationNodes$Origin == "reference", ]
-
-# Order by InDegree, decreasing order
-citationsLit <- citationsLit[with (citationsLit, order(-InDegree)), ]
-citationsRef <- citationsRef[with (citationsRef, order(-InDegree)), ]
 
 # Trim FullReference to 100 characters
 citationsLit$FullReference <- strtrim(citationsLit$FullReference, 100)
 citationsRef$FullReference <- strtrim(citationsRef$FullReference, 100)
 
-# Display the top 25 of most cited references included in the dataset 
-kable(head(citationsLit[, c("FullReference", "InDegree")], 25))
+# Order by TimesCited, decreasing order
+citationsLit <- citationsLit[with (citationsLit, order(-TimesCited)), ]
+kable(head(citationsLit[, c("Article", "TimesCited")], 25))
 ```
+
+### The papers with the highest in-degree
+Literature in the dataset references these sources the most often. The following papers are included in the dataset.
+```{r,echo=FALSE}
+# Order by InDegree, decreasing order
+citationsLit <- citationsLit[with (citationsLit, order(-InDegree)), ]
+citationsRef <- citationsRef[with (citationsRef, order(-InDegree)), ]
+# Display the top 25 of most cited references included in the dataset 
+kable(head(citationsLit[, c("Article", "InDegree")], 25))
+```
+
 
 ### The references with the highest in-degree NOT found in the dataset
 Literature in the dataset references these sources the most often. These papers are not included in the dataset and might warrant inclusion.
@@ -323,7 +323,7 @@ citationsLit <- citationsLit[with (citationsLit, order(-PageRank)), ]
 citationsRef <- citationsRef[with (citationsRef, order(-PageRank)), ]
 
 # Display the top 25 papers with highest PageRank included in the dataset 
-kable(head(citationsLit[, c("FullReference", "PageRank")], 25))
+kable(head(citationsLit[, c("Article", "PageRank")], 25))
 ```
 
 ### The references with the highest PageRank scores NOT found in the dataset
@@ -331,24 +331,5 @@ PageRank score calculated within the citation network of the dateset.
 ```{r,echo=FALSE}
 # Display the top 25 papers with highest PageRank not included in the dataset 
 kable(head(citationsRef[, c("FullReference", "PageRank")], 25))
-```
-
-# Abstracts
-## Highest in-degree
-```{r,echo=FALSE}
-# Helper function for printing abstracts
-printAbstract <- function(df) {
-    title <- toupper(df[9])
-    abstract <- df[10]
-    cat(paste(title, "\n", abstract, "\n\n"))
-}
-citationsLit <- citationsLit[with (citationsLit, order(-InDegree)), ]
-apply(head(citationsLit, 10), 1, printAbstract)
-```
-
-# Highest PageRank
-```{r,echo=FALSE}
-citationsLit <- citationsLit[with (citationsLit, order(-PageRank)), ]
-apply(head(citationsLit, 10), 1, printAbstract)
 ```
 
