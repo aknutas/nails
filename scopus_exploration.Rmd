@@ -1,0 +1,318 @@
+---
+title: "Literature review"
+author: "Juho Salminen"
+date: "4 May 2015"
+output: html_document
+---
+
+
+```{r,echo=FALSE, message=FALSE, results='hide'}
+# Loading libraries
+library(ggplot2)
+library(splitstackshape)
+library(igraph)
+library(knitr)
+
+# Set ggplot theme
+theme_set(theme_minimal(15))
+options(stringsAsFactors = FALSE)
+```
+
+
+```{r, echo=FALSE, warning=FALSE, results='hide'}
+# Loading and preparing data
+
+# Call cleaning2.R to process the data in the input folder and 
+# save processed files to output folder
+source("scopus_cleaning.R", chdir = T)
+
+# Load data
+literature <- read.csv("output/literature.csv", header = T, 
+                       sep = ";")
+literatureByAuthor <- read.csv("output/literature_by_author.csv", header = T, 
+                               sep = ";", )
+literatureByKeywords <- read.csv("output/literature_by_keywords.csv", header = T, 
+                               sep = ";")
+literatureByIndex <- read.csv("output/literature_by_index.csv", header = T, 
+                               sep = ";")
+citationEdges <- read.csv("output/citation_edges.csv", header = T, 
+                          sep = ";")
+citationNodes <- read.csv("output/citation_nodes.csv", header = T, 
+                          sep = ";")
+
+# Helper function to remove leading and trailing whitespace
+trim <- function (x) gsub("^\\s+|\\s+$", "", x)
+
+# Fixing variable types
+```
+
+## Data description
+Number of dimensions (rows and columns) and variable names. 
+```{r, echo=FALSE}
+# Describing the data
+dims <- dim(literature)
+cat("Data consist of", dims[1], "observations of", dims[2], "variables.")
+```
+
+## Distribution of publication years 
+```{r, echo=FALSE}
+qplot(data = literature, Year, fill = I("darkgreen"), binwidht = 1) + 
+    ggtitle("Year published") + 
+    xlab("Year") + 
+    ylab("Article count")
+summary(literature$Year)
+```
+
+## Distribution of citation counts
+The lowest 99 % of citation counts are shown. There are often outliers with 
+orders of more citations than the typical articles.
+```{r,echo=FALSE}
+# Find 99th quantile of times cited and create plot title
+q99 <- quantile(literature$Cited.by, .99, na.rm = T)
+titleText <- paste("Times cited\n(< ", floor(q99), " citations)", sep = "")
+
+qplot(data = literature, Cited.by, binwidth = 1, fill = I("red")) + 
+    scale_x_continuous(limits = c(0,q99)) + 
+    ggtitle(titleText) + 
+    xlab("Number of times cited") + 
+    ylab("Article count")
+
+summary(literature$Cited.by)
+```
+
+## Important authors
+```{r,echo=FALSE, fig.height=7}
+# Calculating total number of citations for each author
+citationSums <- aggregate(literatureByAuthor$Cited.by, 
+    by = list(Authors = toupper(literatureByAuthor$Authors)), 
+    FUN = sum)
+
+# Fixing column names
+names(citationSums) <- c("Authors", "Cited.by")
+# Crating new data frame to plot citations by author
+
+# Extract author names 
+authorNames <- unlist(strsplit(literature$Authors, ","))
+# Remove apostrophes
+authorNames <- gsub("'", "", authorNames)
+# Count author name frequencies
+authors <- table(authorNames)
+# Transform to a data frame
+authors <- as.data.frame(authors)
+# Merge with data frame containing the total times citated by each author
+authors <- merge(authors, citationSums, by.x = "authorNames", 
+              by.y = "Authors" )
+# Fix column name
+names(authors)[1] <- "Authors" 
+# Sort the table by total times sited, decreasing order
+authors <- authors[with (authors, order(-Cited.by)), ]
+# Extract the names of top 25 most cited authors
+top25 <- head(authors$Authors, 25)
+# Merge with the rest of the data. This data frame can have the same author name
+# multiple times
+authorsdf <- merge(authors, literatureByAuthor, by = "Authors")
+# Extract top 25 most cited authors. This data frame has each author name only once.
+top25Authors <- head(authors, 25)
+# Top 25 authors again. Each article on a separate row.
+top25Authorsdf <- authorsdf[authorsdf$Authors %in% top25, ]
+top25Authorsdf <- transform(top25Authorsdf, 
+                            Authors = reorder(Authors, Cited.by.y))
+
+# Sort authors by number of articles, extract top 25, 
+# and reorder factors for plotting
+authors <- authors[with (authors, order(-Freq)), ]
+authorsPop <- head(authors, 25)
+authorsPop <- transform(authorsPop, Authors = reorder(Authors, Freq))
+
+ggplot(authorsPop, aes(Authors, Freq)) +
+    geom_bar(stat = "identity", fill = "blue") + 
+    coord_flip() +
+    ggtitle("Top 25 most productive authors") + 
+    xlab("Author") + 
+    ylab("Number of articles")
+```
+
+Sorted by number of articles published.
+
+```{r,echo=FALSE}
+ggplot(top25Authorsdf, aes(Authors, Cited.by.y)) + 
+    geom_boxplot(color = "blue") +
+    coord_flip() +
+    ggtitle("Citations of top 25\nmost cited authors") + 
+    xlab("Author") + ylab("Times cited")
+```
+
+Sorted by total number of citations.
+
+## Important publications
+```{r,echo=FALSE, fig.width=10, fig.height=7}
+# Calculating total citations for each publication.
+# Functionality same as for the authors, see above.
+
+citationSums <- aggregate(literature$Cited.by, 
+    by = list(Source.title= literature$Source.title), 
+    FUN = sum)
+names(citationSums) <- c("Source.title", "PublicationTotalCitations")
+citationSums <- citationSums[with (citationSums, order(-PublicationTotalCitations)), ]
+top25 <- head(citationSums[,c("Source.title", "PublicationTotalCitations")], 25)
+
+publications <- sort(table(literature$Source.title), decreasing = T)
+publications <- as.data.frame(publications)
+publications$Publication <- row.names(publications)
+names(publications) <- c("Count", "Publication")
+publications$Publication <- strtrim(publications$Publication, 50)
+publications <- transform(publications, Publication = reorder(Publication, Count))
+
+literature <- merge(literature, citationSums, 
+                    by = "Source.title" )
+
+top25Lit <- literature[literature$Source.title %in% top25$Source.title, ]
+top25Lit$Source.title <- strtrim(top25Lit$Source.title, 50)
+top25Lit <- transform(top25Lit,  
+            Source.title = reorder(Source.title, PublicationTotalCitations))
+
+ggplot(head(publications, 25), aes(Publication, Count)) + 
+    geom_bar(stat = "identity", fill = "orange") + 
+    coord_flip() + 
+    theme(legend.position = "none") +
+    ggtitle("Most popular publications") + 
+    xlab("Publication") + 
+    ylab("Article count")
+```
+
+Sorted by number of published articles in the dataset.
+
+```{r,echo=FALSE, fig.width=10, fig.height=7}
+ggplot(top25Lit, 
+       aes(Source.title, Cited.by)) + 
+    geom_boxplot(color = "orange") + 
+    coord_flip() +
+    theme(legend.position = "none") +
+    ggtitle("Top 25\nmost cited publications") + 
+    xlab("Publication") + ylab("Times cited")
+```
+
+Sorted by the total number of citations.
+
+## Important keywords
+
+```{r, echo=FALSE, fig.height=7, fig.width=8}
+# Calculating total citations for each keyword
+# Functionality same as for the authors, see above.
+
+keywordCitationSum <- aggregate(literatureByKeywords$Cited.by, 
+                                by = list(Author.Keywords = 
+                            literatureByKeywords$Author.Keywords), FUN = sum)
+names(keywordCitationSum) <- c("Author.Keywords", "TotalTimesCited")
+
+keywords <- unlist(strsplit(literature$Author.Keywords, ";"))
+keywords <- table(keywords)
+keywords <- as.data.frame(keywords)
+names(keywords) <- c("Author.Keywords", "Freq")
+
+keywords <- merge(keywords, keywordCitationSum, by = "Author.Keywords")
+
+keywords <- keywords[with (keywords, order(-TotalTimesCited)), ]
+top25 <- head(keywords$Author.Keywords, 25)
+keywordsdf <- merge(keywords, literatureByKeywords, by = "Author.Keywords")
+top25keywords <- head(keywords, 25)
+top25keywordsdf <- keywordsdf[keywordsdf$Author.Keywords %in% top25, ]
+
+keywords <- keywords[with (keywords, order(-Freq)), ]
+keywordsPop <- head(keywords, 25)
+keywordsPop <- transform(keywordsPop, Author.Keywords = 
+                             reorder(Author.Keywords, Freq))
+
+top25keywordsdf <- transform(top25keywordsdf, 
+                             Author.Keywords = reorder(Author.Keywords, TotalTimesCited))
+
+ggplot(keywordsPop, aes(Author.Keywords, Freq)) +
+    geom_bar(stat = "identity", fill = "purple") + 
+    coord_flip() +
+    ggtitle("Top 25 most popular keywords") + 
+    xlab("Keyword") + 
+    ylab("Number of occurences")
+```
+
+Sorted by number of articles where the keyword is mentioned.
+
+```{r,echo=FALSE}
+ggplot(top25keywordsdf, aes(Author.Keywords, Cited.by)) + 
+    geom_boxplot(color = "purple") +
+    coord_flip()  +
+    ggtitle("Citations of top 25 most cited keywords") + 
+    xlab("Keyword") + ylab("Times cited")
+```
+
+Sorted by total number of citations for the keyword.
+
+## The most important papers
+The most important papers and other sources are identified below using several importance measures.
+
+### The most cited articles
+Total citation counts according to Web of Science.
+```{r,echo=FALSE}
+# Remove edges with nodes missing from node table
+correct <- (citationEdges$Target %in% citationNodes$Id & 
+                 citationEdges$Source %in% citationNodes$Id)
+citationEdges <- citationEdges[correct, ]
+
+# Create igraph
+citationGraph <- graph.data.frame(citationEdges, vertices = citationNodes)
+# Calculate PageRanks
+citationNodes$PageRank <- page.rank(citationGraph)$vector
+# Calculate in-degrees
+citationNodes$InDegree <- degree(citationGraph, mode = "in")
+
+# Extract the articles included in the data set and articles not included
+# in the dataset
+citationsLit <- citationNodes[citationNodes$Origin == "literature", ]
+citationsLit <- merge(citationsLit, literature[, c(3, 11, 16, 42, 43)], 
+                       by.x = "Id", by.y = "ReferenceString")
+citationsLit$Article <- paste(toupper(citationsLit$Title), " | ",
+                              citationsLit$Id, " | ", 
+                                      citationsLit$Abstract)
+citationsRef <- citationNodes[citationNodes$Origin == "reference", ]
+
+# Order by TimesCited, decreasing order
+citationsLit <- citationsLit[with (citationsLit, order(-Cited.by)), ]
+kable(head(citationsLit[, c("Article", "Cited.by")], 25))
+```
+
+### The papers with the highest in-degree
+Literature in the dataset references these sources the most often. The following papers are included in the dataset.
+```{r,echo=FALSE}
+# Order by InDegree, decreasing order
+citationsLit <- citationsLit[with (citationsLit, order(-InDegree)), ]
+citationsRef <- citationsRef[with (citationsRef, order(-InDegree)), ]
+# Display the top 25 of most cited references included in the dataset 
+kable(head(citationsLit[, c("Article", "InDegree")], 25))
+```
+
+
+### The references with the highest in-degree NOT found in the dataset
+Literature in the dataset references these sources the most often. These papers are not included in the dataset and might warrant inclusion.
+```{r,echo=FALSE}
+# Display the top 25 of most cited references not included in the dataset 
+kable(head(citationsRef[, c("Id", "InDegree")], 25))
+```
+
+### The articles with highest PageRank scores
+PageRank score calculated within the citation network of the dateset.
+```{r,echo=FALSE}
+# Order by PageRank decreasing order
+citationsLit <- citationsLit[with (citationsLit, order(-PageRank)), ]
+citationsRef <- citationsRef[with (citationsRef, order(-PageRank)), ]
+
+# Display the top 25 papers with highest PageRank included in the dataset 
+kable(head(citationsLit[, c("Article", "PageRank")], 25))
+```
+
+### The references with the highest PageRank scores NOT found in the dataset
+PageRank score calculated within the citation network of the dateset.
+```{r,echo=FALSE}
+# Display the top 25 papers with highest PageRank not included in the dataset 
+kable(head(citationsRef[, c("Id", "PageRank")], 25))
+```
+
+
