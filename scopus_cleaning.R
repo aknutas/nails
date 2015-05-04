@@ -172,17 +172,12 @@ getYear <- function(x) {
 }
 
 # Extract publication years of references
-refYear <- strsplit(referencelist, ",")
 refYear <- sapply(references$Reference, getYear)
 
 # Create data frame of nodes from references
 citationNodes <- data.frame(Id = references$Reference, 
                             Year = refYear)
 
-
-citationNodes <- data.frame(Id = referencedf$Reference, 
-                            YearPublished = refYear,  
-                            FullReference = referencelist)
 citationNodes$Origin <- rep("reference", nrow(citationNodes))
 
 # Create data frame of nodes from literature records
