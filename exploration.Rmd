@@ -301,7 +301,7 @@ topLit <- rbind(topLit, head(citationsLit, 25))
 citationsLit <- citationsLit[with (citationsLit, order(-PageRank)), ]
 topLit <- rbind(topLit, head(citationsLit, 25))
 topLit <- topLit[!duplicated(topLit[, "FullReference"]), ]
-topLit <- topLit[with (topLit, order(-InDegree)), ]
+topLit <- topLit[with (topLit, order(-InDegree, -TimesCited, -PageRank)), ]
 kable(topLit[, c("Article", "InDegree", "TimesCited","PageRank")])
 ```
 
@@ -312,7 +312,7 @@ topRef <- head(citationsRef, 25)
 citationsRef <- citationsRef[with (citationsRef, order(-PageRank)), ]
 topRef <- rbind(topRef, head(citationsRef, 25))
 topRef <- topRef[!duplicated(topRef[, "FullReference"]), ]
-topRef <- topRef[with (topRef, order(-InDegree)), ]
+topRef <- topRef[with (topRef, order(-InDegree, -PageRank)), ]
 kable(topRef[, c("FullReference", "InDegree", "PageRank")])
 ```
 
