@@ -61,7 +61,6 @@ literature$AuthorKeywords <- as.character(literature$AuthorKeywords)
 
 literatureByKeywords$AuthorKeywords <- as.character(literatureByKeywords$AuthorKeywords)
 ```
-# Literature review
 
 ## Data description
 Number of dimensions (rows and columns) and variable names. Using full variable 
@@ -74,7 +73,7 @@ cat("Data consist of", dims[1], "observations of", dims[2], "variables.")
 ```
 
 ## Distribution of publication years 
-```{r, echo=FALSE}
+```{r, echo=FALSE, warning=FALSE}
 qplot(data = literature, YearPublished, fill = I("darkgreen"), binwidht = 1) + 
     ggtitle("Year published") + 
     xlab("Year") + 

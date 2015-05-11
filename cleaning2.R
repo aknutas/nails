@@ -1,9 +1,8 @@
 
-
 # Load required libraries
 library(splitstackshape)
 library(reshape)
-library(plyr)
+suppressPackageStartupMessages(library(plyr))
 library(stringr)
 
 # Set working directory to folder containing folders named "input" and "output.
@@ -165,9 +164,9 @@ literatureByAuthor <- literatureByAuthor[
     !is.na(literatureByAuthor$AuthorFullName),]
 # Create data frame: AuthorFullName split by ";", each name on a new row, 
 # id copied to new rows
-literatureByAuthor <- concat.split.multiple(literatureByAuthor, 
-                                            split.col = "AuthorFullName", 
-                                            sep = ";", "long")
+literatureByAuthor <- cSplit(literatureByAuthor, 
+                                            splitCols = "AuthorFullName", 
+                                            sep = ";", direction = "long")
 # Removing rows with NA as author name created in previous step
 literatureByAuthor <- literatureByAuthor[
     !is.na(literatureByAuthor$AuthorFullName),]
@@ -192,9 +191,9 @@ literatureByKeywords <- literatureByKeywords[
     !is.na(literatureByKeywords$AuthorKeywords),]
 literatureByKeywords <- literatureByKeywords[
     literatureByKeywords$AuthorKeywords != "", ]
-literatureByKeywords <- concat.split.multiple(literatureByKeywords, 
-                                              split.col = "AuthorKeywords", 
-                                              sep = ";", "long")
+literatureByKeywords <- cSplit(literatureByKeywords, 
+                                              splitCols = "AuthorKeywords", 
+                                              sep = ";", direction = "long")
 literatureByKeywords <- literatureByKeywords[
     !is.na(literatureByKeywords$AuthorKeywords),]
 literatureByKeywords <- subset(literatureByKeywords, 
@@ -217,9 +216,9 @@ literatureByCategory <- literatureByCategory[
     !is.na(literatureByCategory$SubjectCategory),]
 literatureByCategory <- literatureByCategory[
     literatureByCategory$SubjectCategory != "", ]
-literatureByCategory <- concat.split.multiple(literatureByCategory, 
-                                              split.col = "SubjectCategory", 
-                                              sep = ";", "long")
+literatureByCategory <- cSplit(literatureByCategory, 
+                                              splitCols = "SubjectCategory", 
+                                              sep = ";", direction = "long")
 literatureByCategory <- literatureByCategory[
     !is.na(literatureByCategory$SubjectCategory),]
 literatureByCategory <- subset(literatureByCategory, 
@@ -434,6 +433,5 @@ nodes <- subset(nodes,
 # Save author edge table
 write.table(nodes, "output/author_edges.csv", 
             sep = ';', row.names = F)
-
 
 
