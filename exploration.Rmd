@@ -22,20 +22,6 @@ theme_set(theme_minimal(15))
 # save processed files to output folder
 source("cleaning2.R", chdir = T)
 
-# Load data
-literature <- read.csv("output/literature.csv", header = T, 
-                       sep = ";")
-literatureByAuthor <- read.csv("output/literature_by_author.csv", header = T, 
-                               sep = ";", )
-literatureByKeywords <- read.csv("output/literature_by_keywords.csv", header = T, 
-                               sep = ";")
-literatureByCategory <- read.csv("output/literature_by_subject.csv", header = T, 
-                               sep = ";")
-citationEdges <- read.csv("output/citation_edges.csv", header = T, 
-                          sep = ";")
-citationNodes <- read.csv("output/citation_nodes.csv", header = T, 
-                          sep = ";")
-
 # Helper function to remove leading and trailing whitespace
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
