@@ -3,7 +3,7 @@ title: "Literature review"
 output: html_document
 ---
 
-```{r,echo=FALSE, message=FALSE, results='hide'}
+```{r,echo=FALSE, message=FALSE, results='hide', warning=FALSE}
 # Loading libraries
 library(ggplot2)
 library(splitstackshape)
@@ -47,28 +47,23 @@ literature$AuthorKeywords <- as.character(literature$AuthorKeywords)
 
 literatureByKeywords$AuthorKeywords <- as.character(literatureByKeywords$AuthorKeywords)
 ```
+This report provides an analysis on the records downloaded from [Web of Science](http://webofscience.com). The analysis identifies the important authors, journals, and keywords in the dataset based on the number of occurences and citation counts. A citation network of the provided records is created and used to identify the important papers according to their in-degree, total citation count and PageRank scores. The analysis finds also often-cited references that were not included in the original dataset downloaded from the Web of Science.
 
-## Data description
-Number of dimensions (rows and columns) and variable names. Using full variable 
-names when available from http://images.webofknowledge.com/WOK46/help/WOS/h_fieldtags.html. 
-(Downloaded 24.10.2014)
-```{r, echo=FALSE}
-# Describing the data
-dims <- dim(literature)
-cat("Data consist of", dims[1], "observations of", dims[2], "variables.")
-```
+See the following article for further details: [Knutas, A., Hajikhani, A., Salminen, J., Ikonen, J., Porras, J., 2015. Cloud-Based Bibliometric Analysis Service for Systematic Mapping Studies. CompSysTech 2015](http://www.codecamp.fi/lib/exe/fetch.php/wiki/nails-compsystech2015-preprint.pdf). Please cite our research paper on bibliometrics if you publish the analysis results. Use is otherwise free. 
 
-## Distribution of publication years 
+The analysed dataset consist of `r nrow(literature)` records with `r ncol(literature)` variables. More information about the variables can be found at [Web of Science](https://images.webofknowledge.com/WOK46/help/WOS/h_fullrec.html). 
+
+## Publication years 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 qplot(data = literature, YearPublished, fill = I("darkgreen"), binwidht = 1) + 
     ggtitle("Year published") + 
     xlab("Year") + 
     ylab("Article count")
-summary(literature$YearPublished)
 ```
 
 
 ## Important authors
+Sorted by the number of articles published and by the total number of citations.
 ```{r,echo=FALSE, fig.height=7}
 # Calculating total number of citations for each author
 citationSums <- aggregate(literatureByAuthor$TimesCited, 
@@ -120,8 +115,6 @@ ggplot(authorsPop, aes(AuthorFullName, Freq)) +
     ylab("Number of articles")
 ```
 
-Sorted by number of articles published.
-
 ```{r,echo=FALSE}
 ggplot(top25Authorsdf, aes(AuthorFullName, TimesCited)) + 
     geom_boxplot(color = "blue") +
@@ -130,9 +123,8 @@ ggplot(top25Authorsdf, aes(AuthorFullName, TimesCited)) +
     xlab("Author") + ylab("Times cited")
 ```
 
-Sorted by total number of citations.
-
 ## Important publications
+Sorted by number of published articles in the dataset and by the total number of citations.
 ```{r,echo=FALSE, fig.width=10, fig.height=7}
 # Calculating total citations for each publication.
 # Functionality same as for the authors, see above.
@@ -168,7 +160,6 @@ ggplot(head(publications, 25), aes(Publication, Count)) +
     ylab("Article count")
 ```
 
-Sorted by number of published articles in the dataset.
 
 ```{r,echo=FALSE, fig.width=10, fig.height=7}
 ggplot(top25Lit, 
@@ -180,10 +171,9 @@ ggplot(top25Lit,
     xlab("Publication") + ylab("Times cited")
 ```
 
-Sorted by the total number of citations.
 
 ## Important keywords
-
+Sorted by the number of articles where the keyword is mentioned and by the total number of citations for the keyword.
 ```{r, echo=FALSE, fig.height=7, fig.width=8}
 # Calculating total citations for each keyword
 # Functionality same as for the authors, see above.
@@ -223,8 +213,6 @@ ggplot(keywordsPop, aes(AuthorKeywords, Freq)) +
     ylab("Number of occurences")
 ```
 
-Sorted by number of articles where the keyword is mentioned.
-
 ```{r,echo=FALSE}
 ggplot(top25keywordsdf, aes(AuthorKeywords, TimesCited)) + 
     geom_boxplot(color = "purple") +
@@ -233,10 +221,10 @@ ggplot(top25keywordsdf, aes(AuthorKeywords, TimesCited)) +
     xlab("Keyword") + ylab("Times cited")
 ```
 
-Sorted by total number of citations for the keyword.
-
 ## The most important papers
-The most important papers and other sources are identified below using several importance measures.
+The most important papers and other sources are identified below using three importance measures: 1) in-degree in the citation network, 2) citation count provided by Web of Science (only for papers included in the dataset), and 3) PageRank score in the citation network. The top 25 highest scoring papers are identified using these measures separately. The results are then combined and duplicates are removed. Results are sorted by in-degree, and ties are first broken by citation count and then by the PageRank.
+
+When a [Digital Object Identifier (DOI)](http://www.doi.org/) is available, the full paper can be found using [Resolve DOI](https://dx.doi.org/) website. 
 
 ```{r,echo=FALSE}
 # Create igraph
@@ -261,7 +249,8 @@ citationsLit$FullReference <- strtrim(citationsLit$FullReference, 100)
 citationsRef$FullReference <- strtrim(citationsRef$FullReference, 100)
 ```
 
-### Included in the dataset.
+### Included in the dataset
+These papers were included in the `r nrow(literature)` records downloaded from the Web of Science.
 ```{r, echo=FALSE}
 citationsLit <- citationsLit[with (citationsLit, order(-TimesCited)), ]
 topLit <- head(citationsLit, 25)
@@ -274,7 +263,8 @@ topLit <- topLit[with (topLit, order(-InDegree, -TimesCited, -PageRank)), ]
 kable(topLit[, c("Article", "InDegree", "TimesCited","PageRank")])
 ```
 
-### NOT included in the dataset.
+### Not included in the dataset
+These papers and other references were not among the `r nrow(literature)` records downloaded from the Web of Science.
 ```{r, echo=FALSE}
 citationsRef <- citationsRef[with (citationsRef, order(-InDegree)), ]
 topRef <- head(citationsRef, 25)
