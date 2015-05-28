@@ -59,7 +59,7 @@ cat("Data consist of", dims[1], "observations of", dims[2], "variables.")
 ```
 
 ## Distribution of publication years 
-```{r, echo=FALSE, warning=FALSE}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 qplot(data = literature, YearPublished, fill = I("darkgreen"), binwidht = 1) + 
     ggtitle("Year published") + 
     xlab("Year") + 
@@ -67,22 +67,6 @@ qplot(data = literature, YearPublished, fill = I("darkgreen"), binwidht = 1) +
 summary(literature$YearPublished)
 ```
 
-## Distribution of citation counts
-The lowest 99 % of citation counts are shown. There are often outliers with 
-orders of more citations than the typical articles.
-```{r,echo=FALSE}
-# Find 99th quantile of times cited and create plot title
-q99 <- quantile(literature$TimesCited, .99, na.rm = T)
-titleText <- paste("Times cited\n(< ", floor(q99), " citations)", sep = "")
-
-qplot(data = literature, TimesCited, binwidth = 1, fill = I("red")) + 
-    scale_x_continuous(limits = c(0,q99)) + 
-    ggtitle(titleText) + 
-    xlab("Number of times cited") + 
-    ylab("Article count")
-
-summary(literature$TimesCited)
-```
 
 ## Important authors
 ```{r,echo=FALSE, fig.height=7}
