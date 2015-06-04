@@ -81,6 +81,11 @@ literature$AuthorKeywords <- tolower(literature$AuthorKeywords)
 literature$AuthorKeywords <- gsub("'", "", literature$AuthorKeywords)
 literature$AuthorKeywords <- gsub('"', "", literature$AuthorKeywords)
 
+literature$KeywordsPlus <- as.character(literature$KeywordsPlus)
+literature$KeywordsPlus <- tolower(literature$KeywordsPlus)
+literature$KeywordsPlus <- gsub("'", "", literature$KeywordsPlus)
+literature$KeywordsPlus <- gsub('"', "", literature$KeywordsPlus)
+
 literature$YearPublished <- as.numeric(as.character(literature$YearPublished))
 
 literature$DocumentTitle <- gsub("'", "", literature$DocumentTitle)
@@ -191,6 +196,19 @@ literatureByKeywords <- literatureByKeywords[
     !is.na(literatureByKeywords$AuthorKeywords),]
 literatureByKeywords <- literatureByKeywords[
     literatureByKeywords$AuthorKeywords != "", ]
+using_KeywordsPlus = FALSE  
+
+if (nrow(literatureByKeywords) == 0) {
+  literatureByKeywords <- subset(literature, 
+                                 select = c("KeywordsPlus", "id"))
+  names(literatureByKeywords)[1] <- "AuthorKeywords" 
+  literatureByKeywords <- literatureByKeywords[
+    !is.na(literatureByKeywords$AuthorKeywords),]
+  literatureByKeywords <- literatureByKeywords[
+    literatureByKeywords$AuthorKeywords != "", ]
+  using_KeywordsPlus = TRUE
+}
+
 if (nrow(literatureByKeywords) > 0) {
   literatureByKeywords <- cSplit(literatureByKeywords, 
                                  splitCols = "AuthorKeywords", 

@@ -177,6 +177,11 @@ Sorted by the number of articles where the keyword is mentioned and by the total
 ```{r, echo=FALSE, fig.height=7, fig.width=8}
 # Calculating total citations for each keyword
 # Functionality same as for the authors, see above.
+if (using_KeywordsPlus == TRUE) {
+  cat("No keywords. Using KeywordsPlus instead.")
+  names(literature)[c(21, 22)] <- c("AuthorKeywordsTemp", "AuthorKeywords")
+}
+
 if (nrow(literatureByKeywords) == 0) {
   cat("No keywords")
 } else {
@@ -225,6 +230,10 @@ if (nrow(literatureByKeywords) > 0) {
     ggtitle("Citations of top 25 most cited keywords") + 
     xlab("Keyword") + ylab("Times cited")
 }
+
+# Change the column names back to original ones
+names(literature)[c(21, 22)] <- c("AuthorKeywords", "KeywordsPlus")
+
 ```
 
 ## Important papers
