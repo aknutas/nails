@@ -177,48 +177,54 @@ Sorted by the number of articles where the keyword is mentioned and by the total
 ```{r, echo=FALSE, fig.height=7, fig.width=8}
 # Calculating total citations for each keyword
 # Functionality same as for the authors, see above.
-
-keywordCitationSum <- aggregate(literatureByKeywords$TimesCited, 
+if (nrow(literatureByKeywords) == 0) {
+  cat("No keywords")
+} else {
+  keywordCitationSum <- aggregate(literatureByKeywords$TimesCited, 
                                 by = list(AuthorKeywords = 
                             literatureByKeywords$AuthorKeywords), FUN = sum)
-names(keywordCitationSum) <- c("AuthorKeywords", "TotalTimesCited")
+  names(keywordCitationSum) <- c("AuthorKeywords", "TotalTimesCited")
 
-keywords <- unlist(strsplit(literature$AuthorKeywords, ";"))
-keywords <- trim(keywords)
-keywords <- table(keywords)
-keywords <- as.data.frame(keywords)
-names(keywords) <- c("AuthorKeywords", "Freq")
+  keywords <- unlist(strsplit(literature$AuthorKeywords, ";"))
+  keywords <- trim(keywords)
+  keywords <- table(keywords)
+  keywords <- as.data.frame(keywords)
+  names(keywords) <- c("AuthorKeywords", "Freq")
 
-keywords <- merge(keywords, keywordCitationSum, by = "AuthorKeywords")
+  keywords <- merge(keywords, keywordCitationSum, by = "AuthorKeywords")
 
-keywords <- keywords[with (keywords, order(-TotalTimesCited)), ]
-top25 <- head(keywords$AuthorKeywords, 25)
-keywordsdf <- merge(keywords, literatureByKeywords, by = "AuthorKeywords")
-top25keywords <- head(keywords, 25)
-top25keywordsdf <- keywordsdf[keywordsdf$AuthorKeywords %in% top25, ]
+  keywords <- keywords[with (keywords, order(-TotalTimesCited)), ]
+  top25 <- head(keywords$AuthorKeywords, 25)
+  keywordsdf <- merge(keywords, literatureByKeywords, by = "AuthorKeywords")
+  top25keywords <- head(keywords, 25)
+  top25keywordsdf <- keywordsdf[keywordsdf$AuthorKeywords %in% top25, ]
 
-keywords <- keywords[with (keywords, order(-Freq)), ]
-keywordsPop <- head(keywords, 25)
-keywordsPop <- transform(keywordsPop, AuthorKeywords = 
+  keywords <- keywords[with (keywords, order(-Freq)), ]
+  keywordsPop <- head(keywords, 25)
+  keywordsPop <- transform(keywordsPop, AuthorKeywords = 
                              reorder(AuthorKeywords, Freq))
 
-top25keywordsdf <- transform(top25keywordsdf, 
+  top25keywordsdf <- transform(top25keywordsdf, 
                              AuthorKeywords = reorder(AuthorKeywords, TotalTimesCited))
 
-ggplot(keywordsPop, aes(AuthorKeywords, Freq)) +
+  ggplot(keywordsPop, aes(AuthorKeywords, Freq)) +
     geom_bar(stat = "identity", fill = "purple") + 
     coord_flip() +
     ggtitle("Top 25 most popular keywords") + 
     xlab("Keyword") + 
     ylab("Number of occurences")
+}
+
 ```
 
 ```{r,echo=FALSE}
-ggplot(top25keywordsdf, aes(AuthorKeywords, TimesCited)) + 
+if (nrow(literatureByKeywords) > 0) {
+  ggplot(top25keywordsdf, aes(AuthorKeywords, TimesCited)) + 
     geom_boxplot(color = "purple") +
     coord_flip()  +
     ggtitle("Citations of top 25 most cited keywords") + 
     xlab("Keyword") + ylab("Times cited")
+}
 ```
 
 ## Important papers

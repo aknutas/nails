@@ -191,15 +191,18 @@ literatureByKeywords <- literatureByKeywords[
     !is.na(literatureByKeywords$AuthorKeywords),]
 literatureByKeywords <- literatureByKeywords[
     literatureByKeywords$AuthorKeywords != "", ]
-literatureByKeywords <- cSplit(literatureByKeywords, 
-                                              splitCols = "AuthorKeywords", 
-                                              sep = ";", direction = "long")
-literatureByKeywords <- literatureByKeywords[
+if (nrow(literatureByKeywords) > 0) {
+  literatureByKeywords <- cSplit(literatureByKeywords, 
+                                 splitCols = "AuthorKeywords", 
+                                 sep = ";", direction = "long")
+  literatureByKeywords <- literatureByKeywords[
     !is.na(literatureByKeywords$AuthorKeywords),]
-literatureByKeywords <- subset(literatureByKeywords, 
-                               select = c("id", "AuthorKeywords"))
-literatureByKeywords <- merge(literatureByKeywords, literature[,-21], 
-                              by = "id")
+  literatureByKeywords <- subset(literatureByKeywords, 
+                                 select = c("id", "AuthorKeywords"))
+  literatureByKeywords <- merge(literatureByKeywords, literature[,-21], 
+                                by = "id")
+}
+
 # Save file
 write.table(literatureByKeywords, "output/literature_by_keywords.csv", 
             row.names = F, sep = ';', qmethod = "double")
