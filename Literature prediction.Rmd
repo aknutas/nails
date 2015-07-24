@@ -1,0 +1,241 @@
+---
+title: "Literature prediction"
+author: "Juho Salminen"
+date: "24 Jul 2015"
+output: html_document
+---
+
+```{r,echo=FALSE, message=FALSE, results='hide', warning=FALSE}
+# Loading libraries
+library(ggplot2)
+library(splitstackshape)
+library(igraph)
+library(knitr)
+library(tm)
+library(randomForest)
+library(knitr)
+library(caret)
+library(RColorBrewer)
+library(wordcloud)
+library(ROCR)
+
+# Set ggplot theme
+theme_set(theme_minimal(15))
+```
+
+
+```{r, echo=FALSE, warning=FALSE, results='hide'}
+# Loading and preparing data
+
+# Call cleaning2.R to process the data in the input folder and 
+# save processed files to output folder
+source("cleaning2.R", chdir = T)
+
+# Helper function to remove leading and trailing whitespace
+trim <- function (x) gsub("^\\s+|\\s+$", "", x)
+
+# Fixing variable types
+literature$AuthorFullName <- as.character(literature$AuthorFullName)
+literatureByAuthor$AuthorFullName <- as.character(literatureByAuthor$AuthorFullName)
+literatureByKeywords$AuthorFullName <- as.character(literatureByKeywords$AuthorFullName)
+literatureByCategory$AuthorFullName <- as.character(literatureByCategory$AuthorFullName)
+
+literature$Abstract <- as.character(literature$Abstract)
+literature$DocumentTitle <- as.character(literature$DocumentTitle)
+
+literature$YearPublished <- as.numeric(as.character(literature$YearPublished))
+
+literature$CitedReferences <- as.character(literature$CitedReferences)
+
+literature$TimesCited <- as.numeric(literature$TimesCited)
+literatureByAuthor$TimesCited <- as.numeric(literatureByAuthor$TimesCited)
+literatureByKeywords$TimesCited <- as.numeric(literatureByKeywords$TimesCited)
+literatureByCategory$TimesCited <- as.numeric(literatureByCategory$TimesCited)
+
+literature$AuthorKeywords <- as.character(literature$AuthorKeywords)
+
+literatureByKeywords$AuthorKeywords <- as.character(literatureByKeywords$AuthorKeywords)
+```
+
+
+```{r, echo=FALSE, warning=FALSE}
+# Create igraph
+citationGraph <- graph.data.frame(citationEdges, vertices = citationNodes)
+# Calculate PageRanks
+citationNodes$PageRank <- page.rank(citationGraph)$vector
+# Calculate in-degrees
+citationNodes$InDegree <- degree(citationGraph, mode = "in")
+
+# Merge to literature NEW
+citationsLit <- citationNodes[citationNodes$Origin == "literature", ]
+literature <- merge(literature, citationsLit[, c(1,3:7)],  
+                      by.y = "FullReference", by.x = "ReferenceString")
+
+# Create categorizations / evaluation metrics
+current_year <- as.numeric(format(Sys.Date(), "%Y"))
+literature$Age <- current_year - literature$YearPublished
+literature$CitationsPerYear <- literature$TimesCited / literature$Age
+literature$IsCited <- 0
+literature$IsCited[literature$TimesCited > 0] <- 1
+literature$IsCited <- as.factor(literature$IsCited)
+```
+
+
+```{r, echo=FALSE, message=FALSE}
+# Text mining
+
+# Extract abstracts 
+abstracts <- literature$Abstract
+# Create corpus
+abstractCorpus <- Corpus(VectorSource(abstracts))
+
+# Clean up
+abstractCorpus <- tm_map(abstractCorpus, content_transformer(tolower), mc.cores=1)
+abstractCorpus <- tm_map(abstractCorpus, removePunctuation, mc.cores = 1)
+abstractCorpus <- tm_map(abstractCorpus, stripWhitespace)
+abstractCorpus <- tm_map(abstractCorpus, function(x) removeWords(x, stopwords("english")),
+                         mc.cores=1)
+
+# Stem corpus
+abstractCorpus <- tm_map(abstractCorpus, stemDocument, mc.cores = 1)
+# Create term document matrix
+abstractDTM <- DocumentTermMatrix(abstractCorpus)
+# Remove sparse terms
+abstractDTM <- removeSparseTerms(abstractDTM, sparse = 0.9)
+# Convert to data frame
+abstractDF <- as.data.frame(as.matrix(abstractDTM))
+```
+
+# Abstracts wordcloud
+```{r, echo=FALSE}
+# Create wordcloud
+pal2 <- brewer.pal(8, "Dark2")
+wordcloud(abstractCorpus, min.freq = 10, max.words = 100, random.order = T, 
+          colors = pal2)
+```
+
+
+```{r, echo=FALSE}
+# Extract features
+literature2 <- literature[, c(2, 3, 8, 22, 33, 59, 68, 70)]
+
+# Author names
+literature2 <- cSplit_e(literature2, "AuthorFullName", sep = ";", 
+                    type = "character", fill = 0)
+
+# Author keywords
+literature2 <- cSplit_e(literature2, "AuthorKeywords", sep = ";", 
+                           type = "character", fill = 0)
+
+# Subject category
+literature2 <- cSplit_e(literature2, "SubjectCategory", sep = ";", 
+                    type = "character", fill = 0)
+
+# Publications
+publications <- as.data.frame(predict(dummyVars(~ PublicationName, data = literature), 
+                        newdata = literature))
+
+# Merge to literature
+literature2 <- cbind(literature2, abstractDF, publications)
+
+# Remove dummy columns with only one occurence
+sums <- colSums(literature2[ , -c(1:8)] != 0) > 1
+columns <- names(sums[sums == TRUE])
+literature2 <- literature2[ , c(names(literature2)[1:8], columns)]
+
+# Fix column names
+lit_names <- names(literature2)
+lit_names <- gsub("[^[:alnum:]]", "", lit_names)
+ids <- c(1:length(lit_names))
+lit_names <- paste(lit_names, ids, sep = "")
+names(literature2) <- lit_names
+
+# Separate old and new literature
+new_lit <- literature2[literature2$Age <= 1, ]
+old_lit <- literature2[literature2$Age > 1, ]
+
+# Split to training and test sets
+set.seed(5769493)
+index <- sample(nrow(old_lit), 0.7 * nrow(old_lit))
+train <- old_lit[index, ]
+test <- old_lit[-index, ]
+
+# Random forest
+model_1 <- randomForest(IsCited8 ~., data = train[, -c(1:4, 6, 7)])
+test$predictions <- predict(model_1, newdata = test, type = "prob")[, 2]
+```
+
+## Cutoff 0.5
+```{r, echo=FALSE}
+predictions <- test$predictions > 0.5
+table(predictions, test$IsCited8)
+```
+
+## Cutoff 0.6
+```{r, echo=FALSE}
+predictions <- test$predictions > 0.6
+table(predictions, test$IsCited8)
+```
+
+
+## ROC
+```{r, echo=FALSE}
+pred <- prediction(test$predictions, test$IsCited)
+perf <- performance(pred, measure="tpr", x.measure="fpr")
+plot(perf, col=rainbow(10))
+abline(0,1, lty=2)
+```
+
+## Cutoffs vs. precision
+```{r, echo=FALSE}
+perf <- performance(pred, measure="prec")
+plot(perf, col=rainbow(10))
+
+# Final model
+model_3 <- randomForest(IsCited8 ~., data = old_lit[, -c(1:4, 6, 7)])
+new_lit$Prediction <- predict(model_3, newdata = new_lit, type = "prob")[, 2]
+
+
+# Extract the articles included in the data set and articles not included
+# in the dataset
+citationsLit <- citationNodes[citationNodes$Origin == "literature", ]
+citationsLit <- merge(citationsLit, literature[, c("id", 
+                                                   "ReferenceString", 
+                                                   "DocumentTitle",
+                                                   "Abstract", 
+                                                   "TimesCited",
+                                                   "DOI")], 
+                       by.x = "FullReference", by.y = "ReferenceString")
+citationsLit$Article <- paste(toupper(citationsLit$DocumentTitle), " | ",
+                              citationsLit$FullReference, " | ", 
+                                      citationsLit$Abstract)
+citationsRef <- citationNodes[citationNodes$Origin == "reference", ]
+
+# Trim FullReference to 100 characters
+citationsLit$FullReference <- strtrim(citationsLit$FullReference, 100)
+citationsRef$FullReference <- strtrim(citationsRef$FullReference, 100)
+
+# Merge predictions
+citationsLit <- merge(citationsLit, new_lit[, c("id1", "Prediction")], 
+                      by.x = "id", by.y = "id1", all = TRUE)
+# Extract papers to be printed
+citationsLit <- citationsLit[with (citationsLit, order(-TimesCited)), ]
+topLit <- head(citationsLit, 25)
+citationsLit <- citationsLit[with (citationsLit, order(-InDegree)), ]
+topLit <- rbind(topLit, head(citationsLit, 25))
+citationsLit <- citationsLit[with (citationsLit, order(-PageRank)), ]
+topLit <- rbind(topLit, head(citationsLit, 25))
+predictedLit <- citationsLit[with (citationsLit, order(-Prediction)), ]
+predictedLit <- predictedLit[predictedLit$Prediction > 0.6, ]
+topLit <- rbind(topLit, head(predictedLit, 25))
+topLit <- topLit[!duplicated(topLit[, "FullReference"]), ]
+topLit <- topLit[with (topLit, order(-InDegree, -TimesCited, -PageRank, -Prediction)), ]
+topLit$Prediction[is.na(topLit$Prediction)] <- ""
+```
+
+# Most important papers
+Prediction is a a predicted probability that a new paper (published during this year or the last year) will get at least 1 citation in the future. The prediction is based on a Random Forest classification model fit on the data from older papers (at least 2 years since publication).
+```{r, echo=FALSE}
+kable(topLit[, c("Article", "InDegree", "TimesCited","PageRank", "Prediction")])
+```
+
