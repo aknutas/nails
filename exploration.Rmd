@@ -89,17 +89,6 @@ authors <- merge(authors, citationSums, by.x = "authorNames",
 names(authors)[1] <- "AuthorFullName" 
 # Sort the table by total times sited, decreasing order
 authors <- authors[with (authors, order(-TotalTimesCited)), ]
-# Extract the names of top 25 most cited authors
-top25 <- head(authors$AuthorFullName, 25)
-# Merge with the rest of the data. This data frame can have the same author name
-# multiple times
-authorsdf <- merge(authors, literatureByAuthor, by = "AuthorFullName")
-# Extract top 25 most cited authors. This data frame has each author name only once.
-top25Authors <- head(authors, 25)
-# Top 25 authors again. Each article on a separate row.
-top25Authorsdf <- authorsdf[authorsdf$AuthorFullName %in% top25, ]
-top25Authorsdf <- transform(top25Authorsdf, 
-                            AuthorFullName = reorder(AuthorFullName, TotalTimesCited))
 
 # Sort authors by number of articles, extract top 25, 
 # and reorder factors for plotting
@@ -116,11 +105,15 @@ ggplot(authorsPop, aes(AuthorFullName, Freq)) +
 ```
 
 ```{r,echo=FALSE}
-ggplot(top25Authorsdf, aes(AuthorFullName, TimesCited)) + 
-    geom_boxplot(color = "blue") +
+# Reorder AuthorFullName factor according to TotalTimesCited (decreasing order)
+authors <- transform(authors, 
+                            AuthorFullName = reorder(AuthorFullName, TotalTimesCited))
+
+ggplot(head(authors, 25), aes(AuthorFullName, TotalTimesCited)) + 
+    geom_bar(stat = "identity", fill = "blue") +
     coord_flip() +
-    ggtitle("Citations of top 25\nmost cited authors") + 
-    xlab("Author") + ylab("Times cited")
+    ggtitle("Top 25 most cited authors") + 
+    xlab("Author") + ylab("Total times cited")
 ```
 
 ## Important publications
@@ -135,6 +128,7 @@ citationSums <- aggregate(literature$TimesCited,
 names(citationSums) <- c("PublicationName", "PublicationTotalCitations")
 citationSums <- citationSums[with (citationSums, order(-PublicationTotalCitations)), ]
 top25 <- head(citationSums[,c("PublicationName", "PublicationTotalCitations")], 25)
+top25$PublicationName <- strtrim(top25$PublicationName, 50)
 
 publications <- sort(table(literature$PublicationName), decreasing = T)
 publications <- as.data.frame(publications)
@@ -145,11 +139,6 @@ publications <- transform(publications, Publication = reorder(Publication, Count
 
 literature <- merge(literature, citationSums, 
                     by = "PublicationName" )
-
-top25Lit <- literature[literature$PublicationName %in% top25$PublicationName, ]
-top25Lit$PublicationName <- strtrim(top25Lit$PublicationName, 50)
-top25Lit <- transform(top25Lit,  
-            PublicationName = reorder(PublicationName, PublicationTotalCitations))
 
 ggplot(head(publications, 25), aes(Publication, Count)) + 
     geom_bar(stat = "identity", fill = "orange") + 
@@ -162,13 +151,15 @@ ggplot(head(publications, 25), aes(Publication, Count)) +
 
 
 ```{r,echo=FALSE, fig.width=10, fig.height=7}
-ggplot(top25Lit, 
-       aes(PublicationName, TimesCited)) + 
-    geom_boxplot(color = "orange") + 
+top25 <- transform(top25, 
+                          PublicationName = reorder(PublicationName, PublicationTotalCitations))
+ggplot(top25, 
+       aes(PublicationName, PublicationTotalCitations)) + 
+    geom_bar(stat = "identity", fill = "orange") + 
     coord_flip() +
     theme(legend.position = "none") +
-    ggtitle("Top 25\nmost cited publications") + 
-    xlab("Publication") + ylab("Times cited")
+    ggtitle("Top 25 most cited publications") + 
+    xlab("Publication") + ylab("Total times cited")
 ```
 
 
@@ -198,19 +189,10 @@ if (nrow(literatureByKeywords) == 0) {
 
   keywords <- merge(keywords, keywordCitationSum, by = "AuthorKeywords")
 
-  keywords <- keywords[with (keywords, order(-TotalTimesCited)), ]
-  top25 <- head(keywords$AuthorKeywords, 25)
-  keywordsdf <- merge(keywords, literatureByKeywords, by = "AuthorKeywords")
-  top25keywords <- head(keywords, 25)
-  top25keywordsdf <- keywordsdf[keywordsdf$AuthorKeywords %in% top25, ]
-
   keywords <- keywords[with (keywords, order(-Freq)), ]
   keywordsPop <- head(keywords, 25)
   keywordsPop <- transform(keywordsPop, AuthorKeywords = 
                              reorder(AuthorKeywords, Freq))
-
-  top25keywordsdf <- transform(top25keywordsdf, 
-                             AuthorKeywords = reorder(AuthorKeywords, TotalTimesCited))
 
   ggplot(keywordsPop, aes(AuthorKeywords, Freq)) +
     geom_bar(stat = "identity", fill = "purple") + 
@@ -219,16 +201,18 @@ if (nrow(literatureByKeywords) == 0) {
     xlab("Keyword") + 
     ylab("Number of occurences")
 }
-
 ```
 
 ```{r,echo=FALSE}
 if (nrow(literatureByKeywords) > 0) {
-  ggplot(top25keywordsdf, aes(AuthorKeywords, TimesCited)) + 
-    geom_boxplot(color = "purple") +
+  keywords <- keywords[with (keywords, order(-TotalTimesCited)), ]
+  keywords <- transform(keywords, AuthorKeywords = 
+                             reorder(AuthorKeywords, TotalTimesCited))
+  ggplot(head(keywords, 25), aes(AuthorKeywords, TotalTimesCited)) + 
+    geom_bar(stat = "identity", fill = "purple") +
     coord_flip()  +
-    ggtitle("Citations of top 25 most cited keywords") + 
-    xlab("Keyword") + ylab("Times cited")
+    ggtitle("Top 25 most cited keywords") + 
+    xlab("Keyword") + ylab("Total times cited")
 }
 
 # Change the column names back to original ones
