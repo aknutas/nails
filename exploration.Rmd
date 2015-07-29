@@ -259,7 +259,7 @@ citationsLit <- citationsLit[with (citationsLit, order(-PageRank)), ]
 topLit <- rbind(topLit, head(citationsLit, 25))
 topLit <- topLit[!duplicated(topLit[, "FullReference"]), ]
 topLit <- topLit[with (topLit, order(-InDegree, -TimesCited, -PageRank)), ]
-kable(topLit[, c("Article", "InDegree", "TimesCited","PageRank")])
+kable(head(topLit[, c("Article", "InDegree", "TimesCited","PageRank")], 50))
 ```
 
 ### Not included in the dataset
@@ -271,6 +271,6 @@ citationsRef <- citationsRef[with (citationsRef, order(-PageRank)), ]
 topRef <- rbind(topRef, head(citationsRef, 25))
 topRef <- topRef[!duplicated(topRef[, "FullReference"]), ]
 topRef <- topRef[with (topRef, order(-InDegree, -PageRank)), ]
-kable(topRef[, c("FullReference", "InDegree", "PageRank")])
+kable(head(topRef[, c("FullReference", "InDegree", "PageRank")], 25))
 ```
 
