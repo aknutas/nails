@@ -68,7 +68,7 @@ Sorted by the number of articles published and by the total number of citations.
 # Calculating total number of citations for each author
 citationSums <- aggregate(literatureByAuthor$TimesCited, 
     by = list(AuthorFullName = toupper(literatureByAuthor$AuthorFullName)), 
-    FUN = sum)
+    FUN = sum, na.rm = T)
 
 # Fixing column names
 names(citationSums) <- c("AuthorFullName", "TotalTimesCited")
@@ -124,7 +124,7 @@ Sorted by number of published articles in the dataset and by the total number of
 
 citationSums <- aggregate(literature$TimesCited, 
     by = list(PublicationName= literature$PublicationName), 
-    FUN = sum)
+    FUN = sum, na.rm = T)
 names(citationSums) <- c("PublicationName", "PublicationTotalCitations")
 citationSums <- citationSums[with (citationSums, order(-PublicationTotalCitations)), ]
 top25 <- head(citationSums[,c("PublicationName", "PublicationTotalCitations")], 25)
@@ -178,7 +178,7 @@ if (nrow(literatureByKeywords) == 0) {
 } else {
   keywordCitationSum <- aggregate(literatureByKeywords$TimesCited, 
                                 by = list(AuthorKeywords = 
-                            literatureByKeywords$AuthorKeywords), FUN = sum)
+                            literatureByKeywords$AuthorKeywords), FUN = sum, na.rm = T)
   names(keywordCitationSum) <- c("AuthorKeywords", "TotalTimesCited")
 
   keywords <- unlist(strsplit(literature$AuthorKeywords, ";"))
