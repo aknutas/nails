@@ -12,6 +12,7 @@ library(splitstackshape)
 library(igraph)
 library(knitr)
 library(tm)
+library(RWeka)
 library(randomForest)
 library(knitr)
 library(caret)
@@ -101,10 +102,19 @@ abstractCorpus <- tm_map(abstractCorpus, function(x) removeWords(x, stopwords("e
 abstractCorpus <- tm_map(abstractCorpus, stemDocument, mc.cores = 1)
 # Create term document matrix
 abstractDTM <- DocumentTermMatrix(abstractCorpus)
+
+
+# Create tokenizer
+tokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 1, max = 3))
+# Create n-gram document-term matrix
+options(mc.cores=1)
+abstractDTM <- DocumentTermMatrix(abstractCorpus, control = list(tokenize = tokenizer))
+
 # Remove sparse terms
-abstractDTM <- removeSparseTerms(abstractDTM, sparse = 0.9)
+abstractDTM <- removeSparseTerms(abstractDTM, sparse = 0.90)
 # Convert to data frame
 abstractDF <- as.data.frame(as.matrix(abstractDTM))
+names(abstractDF) <- paste("ABS", names(abstractDF), sep = "_")
 
 # Extract titles
 titles <- literature$DocumentTitle
