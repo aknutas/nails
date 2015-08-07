@@ -22,6 +22,9 @@ theme_set(theme_minimal(12))
 # save processed files to output folder
 source("cleaning2.R", chdir = T)
 
+# Load yearly publication data
+years <- read.table("analyze.csv", sep = ";", header = T)
+
 # Helper function to remove leading and trailing whitespace
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
@@ -60,6 +63,23 @@ ggplot(literature, aes(YearPublished)) +
   ggtitle("Year published") + 
   xlab("Year") + 
   ylab("Article count")
+
+# Calculate relative publication counts
+yearTable <- table(literature$YearPublished)
+yearDF <- as.data.frame(yearTable)
+names(yearDF) <- c("Year", "Freq")
+yearDF <- merge(yearDF, years, by.x = "Year", by.y = "Year")
+yearDF$Year <- as.numeric(as.character(yearDF$Year))
+yearDF$Fraction <- yearDF$Freq / yearDF$Records
+```
+
+## Relative publication volume
+```{r, echo=FALSE}
+ggplot(yearDF, aes(Year, Fraction, group = 1)) + 
+  geom_line(color = "darkgreen") + 
+  xlab("Year") + 
+  ylab("Fraction of all publications") + 
+  ggtitle("Relative publication volume")
 ```
 
 
