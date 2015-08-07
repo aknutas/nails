@@ -11,11 +11,11 @@ library(igraph)
 library(knitr)
 
 # Set ggplot theme
-theme_set(theme_minimal(15))
+theme_set(theme_minimal(12))
 ```
 
 
-```{r, echo=FALSE, warning=FALSE, results='hide'}
+```{r, echo=FALSE, warning=FALSE, results='hide', message=FALSE}
 # Loading and preparing data
 
 # Call cleaning2.R to process the data in the input folder and 
@@ -55,16 +55,17 @@ The analysed dataset consist of `r nrow(literature)` records with `r ncol(litera
 
 ## Publication years 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
-qplot(data = literature, YearPublished, fill = I("darkgreen"), binwidht = 1) + 
-    ggtitle("Year published") + 
-    xlab("Year") + 
-    ylab("Article count")
+ggplot(literature, aes(YearPublished)) +
+  geom_histogram(binwidth = 1, fill = "darkgreen") + 
+  ggtitle("Year published") + 
+  xlab("Year") + 
+  ylab("Article count")
 ```
 
 
 ## Important authors
 Sorted by the number of articles published and by the total number of citations.
-```{r,echo=FALSE, fig.height=7}
+```{r,echo=FALSE}
 # Calculating total number of citations for each author
 citationSums <- aggregate(literatureByAuthor$TimesCited, 
     by = list(AuthorFullName = toupper(literatureByAuthor$AuthorFullName)), 
@@ -99,12 +100,12 @@ authorsPop <- transform(authorsPop, AuthorFullName = reorder(AuthorFullName, Fre
 ggplot(authorsPop, aes(AuthorFullName, Freq)) +
     geom_bar(stat = "identity", fill = "blue") + 
     coord_flip() +
-    ggtitle("Top 25 most productive authors") + 
+    ggtitle("Productive authors") + 
     xlab("Author") + 
     ylab("Number of articles")
 ```
 
-```{r,echo=FALSE}
+```{r,echo=FALSE, fig.width=8}
 # Reorder AuthorFullName factor according to TotalTimesCited (decreasing order)
 authors <- transform(authors, 
                             AuthorFullName = reorder(AuthorFullName, TotalTimesCited))
@@ -112,13 +113,13 @@ authors <- transform(authors,
 ggplot(head(authors, 25), aes(AuthorFullName, TotalTimesCited)) + 
     geom_bar(stat = "identity", fill = "blue") +
     coord_flip() +
-    ggtitle("Top 25 most cited authors") + 
+    ggtitle("Most cited authors") + 
     xlab("Author") + ylab("Total times cited")
 ```
 
 ## Important publications
 Sorted by number of published articles in the dataset and by the total number of citations.
-```{r,echo=FALSE, fig.width=10, fig.height=7}
+```{r,echo=FALSE, fig.width=8}
 # Calculating total citations for each publication.
 # Functionality same as for the authors, see above.
 
@@ -150,7 +151,7 @@ ggplot(head(publications, 25), aes(Publication, Count)) +
 ```
 
 
-```{r,echo=FALSE, fig.width=10, fig.height=7}
+```{r,echo=FALSE}
 top25 <- transform(top25, 
                           PublicationName = reorder(PublicationName, PublicationTotalCitations))
 ggplot(top25, 
@@ -158,14 +159,14 @@ ggplot(top25,
     geom_bar(stat = "identity", fill = "orange") + 
     coord_flip() +
     theme(legend.position = "none") +
-    ggtitle("Top 25 most cited publications") + 
+    ggtitle("Most cited publications") + 
     xlab("Publication") + ylab("Total times cited")
 ```
 
 
 ## Important keywords
 Sorted by the number of articles where the keyword is mentioned and by the total number of citations for the keyword.
-```{r, echo=FALSE, fig.height=7, fig.width=8}
+```{r, echo=FALSE}
 # Calculating total citations for each keyword
 # Functionality same as for the authors, see above.
 if (using_KeywordsPlus == TRUE) {
@@ -197,7 +198,7 @@ if (nrow(literatureByKeywords) == 0) {
   ggplot(keywordsPop, aes(AuthorKeywords, Freq)) +
     geom_bar(stat = "identity", fill = "purple") + 
     coord_flip() +
-    ggtitle("Top 25 most popular keywords") + 
+    ggtitle("Popular keywords") + 
     xlab("Keyword") + 
     ylab("Number of occurences")
 }
@@ -211,7 +212,7 @@ if (nrow(literatureByKeywords) > 0) {
   ggplot(head(keywords, 25), aes(AuthorKeywords, TotalTimesCited)) + 
     geom_bar(stat = "identity", fill = "purple") +
     coord_flip()  +
-    ggtitle("Top 25 most cited keywords") + 
+    ggtitle("Most cited keywords") + 
     xlab("Keyword") + ylab("Total times cited")
 }
 
