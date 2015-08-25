@@ -5,12 +5,17 @@ date: "24 Jul 2015"
 output: html_document
 ---
 
+```{r, echo=FALSE}
+library(knitr)
+opts_chunk$set(echo = FALSE, message = FALSE)
+```
+
+
 ```{r,echo=FALSE, message=FALSE, results='hide', warning=FALSE}
 # Loading libraries
 library(ggplot2)
 library(splitstackshape)
 library(igraph)
-library(knitr)
 library(tm)
 library(RWeka)
 library(randomForest)
@@ -210,107 +215,122 @@ old_lit <- literature2[literature2$Age > 1, ]
 ```
 
 ```{r, echo=FALSE}
-# Timing the algorithm
-stopTime <- Sys.time()
-cat("Munging time: ", stopTime - startTime)
-startTime <- Sys.time()
-# Final model
-old_lit <- old_lit[complete.cases((old_lit)), ]
-model_3 <- randomForest(IsCited_9 ~., data = old_lit[, -c(1, 3, 4, 7, 8)], 
+if (nrow(old_lit) > 0 & nrow(new_lit) > 0) {
+  # Timing the algorithm
+  stopTime <- Sys.time()
+  cat("Munging time: ", stopTime - startTime)
+  startTime <- Sys.time()
+  # Final model
+  old_lit <- old_lit[complete.cases((old_lit)), ]
+  model_3 <- randomForest(IsCited_9 ~., data = old_lit[, -c(1, 3, 4, 7, 8)], 
                         ntree = 201)
-new_lit$Prediction <- predict(model_3, newdata = new_lit, type = "prob")[, 2]
-endTime <- Sys.time()
-cat("Execution time:", endTime - startTime)
-cat("Features:", ncol(old_lit))
-cat("Training set:", nrow(old_lit))
-cat("Test set:", nrow(new_lit))
+  new_lit$Prediction <- predict(model_3, newdata = new_lit, type = "prob")[, 2]
+  endTime <- Sys.time()
+  cat("Execution time:", endTime - startTime, "\n")
+  cat("Features:", ncol(old_lit), "\n")
+  cat("Training set:", nrow(old_lit), "\n")
+  cat("Test set:", nrow(new_lit))
+}
 ```
 
 ## Baseline vs. model
 ```{r, echo=FALSE}
-table(literature$IsCited) / nrow(literature)
-model_3$confusion
+if (exists("model_3")) {
+  table(literature$IsCited) / nrow(literature)
+  model_3$confusion
+}
 ```
 
 
 ## Variable importance
 ```{r, echo=FALSE, fig.height=6, fig.width=10}
-varImpPlot(model_3, type=2, n.var=30, scale=FALSE, 
+if (exists("model_3")) {
+  varImpPlot(model_3, type=2, n.var=30, scale=FALSE, 
            main="Top 30 variable Importance (Gini)")
+}
 ```
 
 ## Positive error rate vs. number of trees
 ```{r, echo=FALSE}
-error_rate <- as.data.frame(model_3$err.rate)
-names(error_rate) <- c("OOB", "zero", "one")
-ggplot(error_rate, aes(c(1:model_3$ntree), one)) + geom_line() + 
-  xlab("Number of trees") + ylab("Positive error rate")
+if (exists("model_3")) {
+  error_rate <- as.data.frame(model_3$err.rate)
+  names(error_rate) <- c("OOB", "zero", "one")
+  ggplot(error_rate, aes(c(1:model_3$ntree), one)) + geom_line() + 
+    xlab("Number of trees") + ylab("Positive error rate")
+}
 ```
 
 
 ## ROC
 ```{r, echo=FALSE}
-pred <- prediction(model_3$votes[, 2], old_lit$IsCited_9)
+if (exists("model_3")) {
+  pred <- prediction(model_3$votes[, 2], old_lit$IsCited_9)
 
-perf <- performance(pred, measure="tpr", x.measure="fpr")
-plot(perf, col=rainbow(10))
-abline(0,1, lty=2)
+  perf <- performance(pred, measure="tpr", x.measure="fpr")
+  plot(perf, col=rainbow(10))
+  abline(0,1, lty=2)
+}
 ```
 
 ## Cutoffs vs. precision
 ```{r, echo=FALSE}
-perf <- performance(pred, measure="prec")
+if (exists("model_3")) {
+  perf <- performance(pred, measure="prec")
 plot(perf, col=rainbow(10))
+}
 
+if (exists("model_3")) {
+  # Extract the articles included in the data set and articles not included
+  # in the dataset
+  citationsLit <- citationNodes[citationNodes$Origin == "literature", ]
+  citationsLit <- merge(citationsLit, literature[, c("id", 
+                                                     "ReferenceString", 
+                                                     "DocumentTitle",
+                                                     "Abstract", 
+                                                     "TimesCited",
+                                                     "DOI")], 
+                         by.x = "FullReference", by.y = "ReferenceString")
+  citationsLit$Article <- paste(toupper(citationsLit$DocumentTitle), " | ",
+                                citationsLit$FullReference, " | ", 
+                                        citationsLit$Abstract)
+  citationsRef <- citationNodes[citationNodes$Origin == "reference", ]
 
+  # Trim FullReference to 100 characters
+  citationsLit$FullReference <- strtrim(citationsLit$FullReference, 100)
+  citationsRef$FullReference <- strtrim(citationsRef$FullReference, 100)
 
-# Extract the articles included in the data set and articles not included
-# in the dataset
-citationsLit <- citationNodes[citationNodes$Origin == "literature", ]
-citationsLit <- merge(citationsLit, literature[, c("id", 
-                                                   "ReferenceString", 
-                                                   "DocumentTitle",
-                                                   "Abstract", 
-                                                   "TimesCited",
-                                                   "DOI")], 
-                       by.x = "FullReference", by.y = "ReferenceString")
-citationsLit$Article <- paste(toupper(citationsLit$DocumentTitle), " | ",
-                              citationsLit$FullReference, " | ", 
-                                      citationsLit$Abstract)
-citationsRef <- citationNodes[citationNodes$Origin == "reference", ]
+  # Merge predictions
+  citationsLit <- merge(citationsLit, new_lit[, c("id_1", "Prediction")], 
+                        by.x = "id", by.y = "id_1", all = TRUE)
+  # Extract papers to be printed
+  citationsLit <- citationsLit[with (citationsLit, order(-TimesCited)), ]
+  topLit <- head(citationsLit, 25)
+  citationsLit <- citationsLit[with (citationsLit, order(-InDegree)), ]
+  topLit <- rbind(topLit, head(citationsLit, 25))
+  citationsLit <- citationsLit[with (citationsLit, order(-PageRank)), ]
+  topLit <- rbind(topLit, head(citationsLit, 25))
+  predictedLit <- citationsLit[with (citationsLit, order(-Prediction)), ]
+  topLit <- rbind(topLit, head(predictedLit, 25))
 
-# Trim FullReference to 100 characters
-citationsLit$FullReference <- strtrim(citationsLit$FullReference, 100)
-citationsRef$FullReference <- strtrim(citationsRef$FullReference, 100)
+  #topLit <- head(predictedLit, 25)
+  predictedLit <- citationsLit[with (citationsLit, 
+                                     order(-Prediction, -InDegree, -TimesCited,
+                                           -PageRank)), ]
+  predictedLit <- predictedLit[!is.na(predictedLit$Prediction), ]
+  predictedLit$Prediction <- round(predictedLit$Prediction, 2)
+  predictedLit$Prediction[is.na(predictedLit$Prediction)] <- ""
+  predictedLit$Ranking <- c(1:nrow(predictedLit))
 
-# Merge predictions
-citationsLit <- merge(citationsLit, new_lit[, c("id_1", "Prediction")], 
-                      by.x = "id", by.y = "id_1", all = TRUE)
-# Extract papers to be printed
-citationsLit <- citationsLit[with (citationsLit, order(-TimesCited)), ]
-topLit <- head(citationsLit, 25)
-citationsLit <- citationsLit[with (citationsLit, order(-InDegree)), ]
-topLit <- rbind(topLit, head(citationsLit, 25))
-citationsLit <- citationsLit[with (citationsLit, order(-PageRank)), ]
-topLit <- rbind(topLit, head(citationsLit, 25))
-predictedLit <- citationsLit[with (citationsLit, order(-Prediction)), ]
-topLit <- rbind(topLit, head(predictedLit, 25))
-
-
-#topLit <- head(predictedLit, 25)
-predictedLit <- citationsLit[with (citationsLit, 
-                                   order(-Prediction, -InDegree, -TimesCited, -PageRank)), ]
-predictedLit <- predictedLit[!is.na(predictedLit$Prediction), ]
-predictedLit$Prediction <- round(predictedLit$Prediction, 2)
-predictedLit$Prediction[is.na(predictedLit$Prediction)] <- ""
-predictedLit$Ranking <- c(1:nrow(predictedLit))
-
-#topLit <- topLit[!is.na(topLit$id), ]
+  #topLit <- topLit[!is.na(topLit$id), ]
+}
 ```
 
 # Most important papers
 Prediction is a a predicted probability that a new paper (published during this year or the last year) will get more than `r medianCitation` (median) citations in the future. The prediction is based on a Random Forest classification model fit on the data from older papers (at least 2 years since publication).
 ```{r, echo=FALSE}
-kable(predictedLit[, c("Ranking", "Article", "InDegree", "TimesCited","PageRank", "Prediction")])
+if (exists("model_3")) {
+  kable(predictedLit[, c("Ranking", "Article", "InDegree", "TimesCited",
+                         "PageRank", "Prediction")])
+}
 ```
 
