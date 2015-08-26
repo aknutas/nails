@@ -116,7 +116,7 @@ options(mc.cores=1)
 abstractDTM <- DocumentTermMatrix(abstractCorpus, control = list(tokenize = tokenizer))
 
 # Remove sparse terms
-abstractDTM <- removeSparseTerms(abstractDTM, sparse = 0.90)
+abstractDTM <- removeSparseTerms(abstractDTM, sparse = 0.75)
 # Convert to data frame
 abstractDF <- as.data.frame(as.matrix(abstractDTM))
 names(abstractDF) <- paste("ABS", names(abstractDF), sep = "_")
@@ -138,7 +138,7 @@ titleCorpus <- tm_map(titleCorpus, stemDocument, mc.cores = 1)
 # Create term document matrix
 titleDTM <- DocumentTermMatrix(titleCorpus)
 # Remove sparse terms
-titleDTM <- removeSparseTerms(titleDTM, sparse = 0.9)
+titleDTM <- removeSparseTerms(titleDTM, sparse = 0.75)
 # Convert to data frame
 titleDF <- as.data.frame(as.matrix(titleDTM))
 # Fix column names

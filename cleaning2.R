@@ -106,6 +106,8 @@ literature$TimesCited <- as.numeric(as.character(literature$TimesCited))
 literature$DOI <- toupper(literature$DOI)
 # Creating reference strings
 
+literature <- literature[nchar(literature$AuthorFullName) < 10000, ]
+
 # Helper function to construct strings
 makeRef <- function(x) {
     refstring <- getName(x)
