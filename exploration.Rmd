@@ -125,7 +125,7 @@ ggplot(authorsPop, aes(AuthorFullName, Freq)) +
     ylab("Number of articles")
 ```
 
-```{r,echo=FALSE, fig.width=8}
+```{r,echo=FALSE}
 # Reorder AuthorFullName factor according to TotalTimesCited (decreasing order)
 authors <- transform(authors, 
                             AuthorFullName = reorder(AuthorFullName, TotalTimesCited))
@@ -139,7 +139,7 @@ ggplot(head(authors, 25), aes(AuthorFullName, TotalTimesCited)) +
 
 ## Important publications
 Sorted by number of published articles in the dataset and by the total number of citations.
-```{r,echo=FALSE, fig.width=8}
+```{r,echo=FALSE}
 # Calculating total citations for each publication.
 # Functionality same as for the authors, see above.
 
@@ -257,7 +257,7 @@ citationNodes$InDegree <- degree(citationGraph, mode = "in")
 # Extract the articles included in the data set and articles not included
 # in the dataset
 citationsLit <- citationNodes[citationNodes$Origin == "literature", ]
-citationsLit <- merge(citationsLit, literature[, c(2, 11, 23, 33, 62)], 
+citationsLit <- merge(citationsLit, literature[, c(2, 11, 23, 33, 64)], 
                        by.x = "FullReference", by.y = "ReferenceString")
 citationsLit$Article <- paste(toupper(citationsLit$DocumentTitle), " | ",
                               citationsLit$FullReference, " | ", 

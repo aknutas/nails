@@ -248,7 +248,7 @@ literatureByCategory <- subset(literatureByCategory,
                                select = c("id", "SubjectCategory"))
 literatureByCategory <- merge(literatureByCategory, literature[,-58], 
                               by = "id")
-literatureByCategory$SubjectCategory <- trim(literatureByCategory$SubjectCategory) 
+literatureByCategory$SubjectCategory <- trim(literatureByCategory$SubjectCategory.x) 
 
 # Save file
 write.table(literatureByCategory, "output/literature_by_subject.csv", 
