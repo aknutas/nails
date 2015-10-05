@@ -60,10 +60,10 @@ fields <- as.character(fieldtags$field[match(tags, fieldtags$tag)])
 fields[is.na(fields)] <- tags[is.na(fields)]     # Throws warnings but seems to be working
 fields <- gsub(" ", "", fields)
 names(literature) <- fields
-names(literature)[22] <- "KeywordsPlus"
-names(literature)[2] <- "PublicationType"
-names(literature)[41] <- "SourceAbbreviation"
-names(literature)[54] <- "DOI"
+names(literature)[names(literature) == "KeywordsPlus\xfc\xbe\x8e\x86\x84\xbc"] <- "KeywordsPlus"
+names(literature)[names(literature) == "PublicationType(conference,book,journal,bookinseries,orpatent)"] <- "PublicationType"
+names(literature)[names(literature) == "29-CharacterSourceAbbreviation"] <- "SourceAbbreviation"
+names(literature)[names(literature) == "DigitalObjectIdentifier(DOI)" ] <- "DOI"
 
 # Helper function to remove leading and trailing whitespace
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
@@ -181,7 +181,8 @@ literatureByAuthor <- literatureByAuthor[
 literatureByAuthor <- subset(literatureByAuthor, 
                              select = c("id", "AuthorFullName"))
 # Merge the rest of the data by id
-literatureByAuthor <- merge(literatureByAuthor, literature[,-7], 
+literatureByAuthor <- merge(literatureByAuthor, 
+                            subset(literature, select = -c(AuthorFullName)), 
                             by = "id")
 # Save file
 write.table(literatureByAuthor, "output/literature_by_author.csv", 
@@ -219,7 +220,8 @@ if (nrow(literatureByKeywords) > 0) {
     !is.na(literatureByKeywords$AuthorKeywords),]
   literatureByKeywords <- subset(literatureByKeywords, 
                                  select = c("id", "AuthorKeywords"))
-  literatureByKeywords <- merge(literatureByKeywords, literature[,-21], 
+  literatureByKeywords <- merge(literatureByKeywords, 
+                                subset(literature, select = -c(AuthorKeywords)), 
                                 by = "id")
 }
 
@@ -246,9 +248,10 @@ literatureByCategory <- literatureByCategory[
     !is.na(literatureByCategory$SubjectCategory),]
 literatureByCategory <- subset(literatureByCategory, 
                                select = c("id", "SubjectCategory"))
-literatureByCategory <- merge(literatureByCategory, literature[,-58], 
+literatureByCategory <- merge(literatureByCategory, 
+                              subset(literature, select = -c(SubjectCategory)), 
                               by = "id")
-literatureByCategory$SubjectCategory <- trim(literatureByCategory$SubjectCategory.x) 
+literatureByCategory$SubjectCategory <- trim(literatureByCategory$SubjectCategory) 
 
 # Save file
 write.table(literatureByCategory, "output/literature_by_subject.csv", 
@@ -445,7 +448,8 @@ nodes$Source <- trim(nodes$Source)
 nodes$Target <- trim(nodes$Target)
 
 # Merge with literature
-nodes <- merge(nodes, literature[, -c(3, 7)], by = "id", )
+nodes <- merge(nodes, subset(literature, select = -c(Authors, AuthorFullName)), 
+               by.x = "id", by.y = "id")
 
 # Subset data. Use this to select columns to include in network data
 nodes <- subset(nodes, 
