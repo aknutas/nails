@@ -104,6 +104,39 @@ literature$CitedReferences <- gsub("DOI DOI", "DOI", literature$CitedReferences)
 literature$TimesCited <- as.numeric(as.character(literature$TimesCited))
 
 literature$DOI <- toupper(literature$DOI)
+
+# Locations
+literature$AuthorAddress <- as.character(literature$AuthorAddress)
+testcase <- literature$AuthorAddress[2]
+
+
+
+get_location <- function(x) {
+  if (x != "") {
+    x <- gsub("\\[.*?\\]", "", x)
+    x <- unlist(strsplit(x, ";"))
+    cities <- sapply(x, function(x) tail(unlist(strsplit(x, ",")), 2))
+    city <- apply(cities, 2, function(x) gsub(".*[0-9]+ ", "", x[1]))
+    city <- sapply(city, trim)
+#    country <- gsub(" ", "", cities[2, ])
+    country <- sapply(cities[2, ], trim)
+    return(paste(paste(city, country, sep = ","), collapse = ";"))
+  }
+  else return(NA)
+}
+
+literature$Locations <- sapply(literature$AuthorAddress, get_location)
+locationList <- unlist(lapply(literature$Locations,
+                              function(x) strsplit(x, ";")))
+
+locations <- data.frame(location = locationList)
+locations$location <- as.character(locations$location)
+locations$city <- gsub(",.*", "", locations$location)
+locations$country <- gsub(".*,", "", locations$location)
+
+write.table(locations, "output/locations.csv", 
+            sep = ";", row.names = F, qmethod = "double")
+
 # Creating reference strings
 
 literature <- literature[nchar(literature$AuthorFullName) < 10000, ]

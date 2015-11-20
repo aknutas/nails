@@ -257,7 +257,8 @@ citationNodes$InDegree <- degree(citationGraph, mode = "in")
 # Extract the articles included in the data set and articles not included
 # in the dataset
 citationsLit <- citationNodes[citationNodes$Origin == "literature", ]
-citationsLit <- merge(citationsLit, literature[, c(2, 11, 23, 33, 64)], 
+citationsLit <- merge(citationsLit, 
+                      literature[, c("TimesCited", "ReferenceString")], 
                        by.x = "FullReference", by.y = "ReferenceString")
 citationsLit$Article <- paste(toupper(citationsLit$DocumentTitle), " | ",
                               citationsLit$FullReference, " | ", 
