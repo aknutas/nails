@@ -165,7 +165,10 @@ wordcloud(abstractCorpus, min.freq = 10, max.words = 100, random.order = F,
 
 ```{r, echo=FALSE}
 # Extract features
-literature2 <- literature[, c(2, 3, 8, 22, 33, 57, 59, 68, 70)]
+literature2 <- literature[, c("id", "PublicationType", "AuthorFullName", 
+                              "AuthorKeywords", "CitedReferenceCount",
+                              "PageCount", "SubjectCategory",
+                              "Age", "IsCited")]
 literature2$PublicationType <- as.factor(literature2$PublicationType)
 
 # Author names
