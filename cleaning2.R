@@ -107,22 +107,25 @@ literature$DOI <- toupper(literature$DOI)
 
 # Locations
 literature$AuthorAddress <- as.character(literature$AuthorAddress)
-testcase <- literature$AuthorAddress[2]
+testcase <- literature$AuthorAddress[19]
 
 
 
 get_location <- function(x) {
-  if (x != "") {
-    x <- gsub("\\[.*?\\]", "", x)
-    x <- unlist(strsplit(x, ";"))
-    cities <- sapply(x, function(x) tail(unlist(strsplit(x, ",")), 2))
-    city <- apply(cities, 2, function(x) gsub(".*[0-9]+ ", "", x[1]))
-    city <- sapply(city, trim)
-#    country <- gsub(" ", "", cities[2, ])
-    country <- sapply(cities[2, ], trim)
-    return(paste(paste(city, country, sep = ","), collapse = ";"))
+    country <- NA
+    if (x != "") {
+        x <- gsub("\\[.*?\\]", "", x)
+        x <- unlist(strsplit(x, ";"))
+        cities <- sapply(x, function(x) tail(unlist(strsplit(x, ",")), 2))
+        city <- apply(cities, 2, function(x) gsub(".*[0-9]+ ", "", x[1]))
+        city <- sapply(city, trim)
+    #   country <- gsub(" ", "", cities[2, ])
+        country <- sapply(cities[2, ], trim)
+        return(paste(paste(city, country, sep = ","), collapse = ";"))
   }
-  else return(NA)
+    else {
+        return(NA)   
+    }
 }
 
 literature$Locations <- sapply(literature$AuthorAddress, get_location)
@@ -343,7 +346,24 @@ referencedf <- merge(referencedf, literature, by = "id")
 # Create data frame of nodes from references
 citationNodes <- data.frame(Id = referencedf$Reference, 
                             YearPublished = refYear,  
-                            FullReference = referencelist)
+                            FullReference = referencelist,
+                            id = NA,
+                            PublicationType = NA,
+                            AuthorFullName = NA,
+                            DocumentTitle = NA,
+                            PublicationName = NA,
+                            BookSeriesTitle = NA,
+                            Language = NA,
+                            DocumentType = NA,
+                            ConferenceTitle = NA,
+                            ConferenceDate = NA,
+                            ConferenceLocation = NA,
+                            ConferenceSponsors = NA,
+                            AuthorKeywords = NA,
+                            SubjectCategory = NA,
+                            TimesCited = NA,
+                            Abstract = NA,
+                            DOI = NA)
 citationNodes$Id <- as.character(citationNodes$Id)
 citationNodes$FullReference <- as.character(citationNodes$FullReference)
 citationNodes$Id[is.na(citationNodes$Id)] <- citationNodes$FullReference[is.na(citationNodes$Id)]
@@ -353,6 +373,31 @@ citationNodes$Origin <- rep("reference", nrow(citationNodes))
 literatureNodes <- data.frame(Id = literature$DOI, 
                               YearPublished = literature$YearPublished, 
                               FullReference = literature$ReferenceString)
+literatureNodes <- subset(literature, select = c(DOI,
+                                                 YearPublished,
+                                                 ReferenceString,
+                                                 id,
+                                                 PublicationType,
+                                                 AuthorFullName,
+                                                 DocumentTitle,
+                                                 PublicationName,
+                                                 BookSeriesTitle,
+                                                 Language,
+                                                 DocumentType,
+                                                 ConferenceTitle,
+                                                 ConferenceDate,
+                                                 ConferenceLocation,
+                                                 ConferenceSponsors,
+                                                 AuthorKeywords,
+                                                 SubjectCategory,
+                                                 TimesCited,
+                                                 Abstract,
+                                                 DOI))
+names(literatureNodes)[c(1:3, 20)] <- c("Id", "YearPublished", "FullReference",
+                                        "DOI")
+
+#literatureNodes$Id <- literature$DOI
+#literatureNodes$FullReference <- literature$ReferenceString
 literatureNodes$Id <- as.character(literatureNodes$Id)
 literatureNodes$FullReference <- as.character(literatureNodes$FullReference)
 literatureNodes$Id[literatureNodes$Id == ""] <- literatureNodes$FullReference[literatureNodes$Id == ""]
