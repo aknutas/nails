@@ -1,0 +1,197 @@
+---
+title: "Literature review"
+output: html_document
+---
+
+```{r,echo=FALSE, message=FALSE, results='hide', warning=FALSE}
+# Loading libraries
+library(ggplot2)
+library(splitstackshape)
+library(igraph)
+library(knitr)
+
+# Set ggplot theme
+theme_set(theme_minimal(12))
+```
+
+
+```{r, echo=FALSE, warning=FALSE, results='hide', message=FALSE}
+# Loading and preparing data
+
+# Call cleaning2.R to process the data in the input folder and 
+# save processed files to output folder
+source("cleaning2.R", chdir = T)
+
+# Load yearly publication data
+years <- read.table("analyze.csv", sep = ";", header = T)
+
+# Helper function to remove leading and trailing whitespace
+trim <- function (x) gsub("^\\s+|\\s+$", "", x)
+
+# Fixing variable types
+literature$AuthorFullName <- as.character(literature$AuthorFullName)
+literatureByAuthor$AuthorFullName <- as.character(literatureByAuthor$AuthorFullName)
+literatureByKeywords$AuthorFullName <- as.character(literatureByKeywords$AuthorFullName)
+literatureByCategory$AuthorFullName <- as.character(literatureByCategory$AuthorFullName)
+
+literature$Abstract <- as.character(literature$Abstract)
+literature$DocumentTitle <- as.character(literature$DocumentTitle)
+
+literature$YearPublished <- as.numeric(as.character(literature$YearPublished))
+
+literature$CitedReferences <- as.character(literature$CitedReferences)
+
+literature$TimesCited <- as.numeric(literature$TimesCited)
+literatureByAuthor$TimesCited <- as.numeric(literatureByAuthor$TimesCited)
+literatureByKeywords$TimesCited <- as.numeric(literatureByKeywords$TimesCited)
+literatureByCategory$TimesCited <- as.numeric(literatureByCategory$TimesCited)
+
+literature$AuthorKeywords <- as.character(literature$AuthorKeywords)
+
+literatureByKeywords$AuthorKeywords <- as.character(literatureByKeywords$AuthorKeywords)
+```
+
+# Number of papers by type
+```{r, echo=FALSE, message=FALSE}
+typecounts <- as.data.frame(table(literature$YearPublished, literature$PublicationType))
+names(typecounts) <- c("YearPublished", "PublicationType", "Freq")
+ggplot(typecounts, aes(YearPublished, Freq, color = PublicationType)) + 
+    geom_line(aes(group = PublicationType)) + 
+    xlab("Year") + 
+    ylab("Frequency") + 
+    ggtitle("Number of publications by type") + 
+    scale_color_discrete(name = "Publication Type", 
+                         labels = c("Book", "Journal", "Conference"))
+```
+
+# Number of authors per year
+```{r, echo=FALSE, message=FALSE}
+authorcounts <- as.data.frame(table(literatureByAuthor$YearPublished))
+names(authorcounts) <- c("YearPublished", "Freq")
+ggplot(authorcounts, aes(YearPublished, Freq)) + 
+    geom_line(aes(group = 1)) + 
+    xlab("Year") + 
+    ylab("Frequency") + 
+    ggtitle("Number of authors")
+```
+
+# Top scientific categories
+```{r, echo=FALSE, message=FALSE}
+subjectcounts <- as.data.frame(table(literatureByCategory$SubjectCategory))
+names(subjectcounts) <- c("SubjectCategory", "Frequency")
+subjectcounts <- subjectcounts[with (subjectcounts, order(-Frequency)), ]
+
+# Reorder factor levels for plotting
+subjectcounts <- transform(subjectcounts, SubjectCategory = reorder(SubjectCategory, Frequency))
+
+ggplot(head(subjectcounts, 25), aes(SubjectCategory, Frequency)) + 
+    geom_bar(stat="identity") +
+    coord_flip() +
+    xlab("Subject Category") + 
+    ggtitle("Top scientific categories")
+
+# Print table
+kable(head(subjectcounts, 25))
+
+# Extract top 25 categories
+topcategories <- as.data.frame(table(literatureByCategory$SubjectCategory))
+names(topcategories) <- c("SubjectCategory", "Frequency")
+topcategories <- topcategories[with (topcategories, order(-Frequency)), ]
+topcategories <- head(topcategories, 10)
+
+# Count subject categories by year, keep only top 25
+subjectcounts <- as.data.frame(table(literatureByCategory$SubjectCategory,
+                                     literatureByCategory$YearPublished))
+names(subjectcounts) <- c("SubjectCategory", "YearPublished", "Frequency")
+subjectcounts <- subjectcounts[subjectcounts$SubjectCategory %in% 
+                                   topcategories$SubjectCategory, ]
+
+ggplot(subjectcounts, aes(YearPublished, Frequency, color = SubjectCategory)) +
+    geom_line(aes(group = SubjectCategory)) +
+    xlab("Year") + 
+    ylab("Count") + 
+    ggtitle("Most common subject categories by year") +
+    scale_color_discrete(name="Subject Category")
+```
+
+# Top funding organizations
+```{r, echo=FALSE, message=FALSE}
+# Split Funding Agencies by ";", keep all data
+funders <- cSplit(literature, splitCols = "FundingAgencyandGrantNumber", 
+                                            sep = ";", direction = "long")
+
+# Remove grant numbers and trailing & leading whitespace
+funders$FundingAgencyandGrantNumber <- gsub("\\[.*\\]", "", funders$FundingAgencyandGrantNumber)
+funders$FundingAgencyandGrantNumber <- sapply(funders$FundingAgencyandGrantNumber, trim)
+
+# Count funders and order by frequency
+fundercounts <- as.data.frame(table(funders$FundingAgencyandGrantNumber))
+names(fundercounts) <- c("FundingAgencyAndGrantNumber", "Frequency")
+fundercounts <- fundercounts[with (fundercounts, order(-Frequency)),]
+
+# Sort factors for plotting
+fundercounts <- transform(fundercounts,
+                          FundingAgencyAndGrantNumber = reorder(FundingAgencyAndGrantNumber,
+                                                                Frequency))
+
+# Remove empty cells again
+fundercounts <- fundercounts[fundercounts$FundingAgencyAndGrantNumber != "", ]
+
+# Extract top 25 funders & trim funding agency names to fit to plot
+topfunders <- head(fundercounts, 25)
+topfunders$FundingAgencyAndGrantNumber <- strtrim(topfunders$FundingAgencyAndGrantNumber, 50)
+# Reorder factors for plotting
+topfunders <- transform(topfunders,
+                          FundingAgencyAndGrantNumber = reorder(FundingAgencyAndGrantNumber,
+                                                                Frequency))
+# Plot top funders
+ggplot(topfunders, aes(FundingAgencyAndGrantNumber, Frequency)) + 
+    geom_bar(stat="identity") +
+    coord_flip() +
+    xlab("Funding Agency") + 
+    ggtitle("Top funding agencies")
+
+# Print top funders
+kable(head(fundercounts, 25))
+
+# Extract names of top 10 funders
+topfunders <- head(fundercounts$FundingAgencyAndGrantNumber, 10)
+
+# Count funders by year, keep only top 10
+fundercounts2 <- as.data.frame(table(funders$FundingAgencyandGrantNumber, 
+                                     funders$YearPublished))
+names(fundercounts2) <- c("FundingAgencyandGrantNumber", "YearPublished", "Frequency")
+fundercounts2 <- fundercounts2[fundercounts2$FundingAgencyandGrantNumber %in% topfunders, ]
+
+# Trim funder names for plotting
+fundercounts2$FundingAgencyandGrantNumber <- strtrim(fundercounts2$FundingAgencyandGrantNumber,
+                                                     50) 
+ggplot(fundercounts2, aes(YearPublished, Frequency, color = FundingAgencyandGrantNumber)) + 
+    geom_line(aes(group = FundingAgencyandGrantNumber)) + 
+    xlab("Year") +
+    scale_color_discrete(name="Funding Agency") +
+    ggtitle("Funding Agencies by Year")
+```
+
+# Keywords
+```{r,echo=FALSE, message=FALSE}
+# Extract top 10 keywords
+topkeywords <- as.data.frame(table(literatureByKeywords$AuthorKeywords))
+names(topkeywords) <- c("AuthorKeywords", "Frequency")
+topkeywords <- topkeywords[with (topkeywords, order(-Frequency)), ]
+topkeywords <- head(topkeywords, 10)
+
+# Count keywords by year, keep only top 10
+keywordcounts <- as.data.frame(table(literatureByKeywords$AuthorKeywords, 
+                                     literatureByKeywords$YearPublished))
+names(keywordcounts) <- c("AuthorKeywords", "YearPublished", "Frequency")
+keywordcounts <- keywordcounts[keywordcounts$AuthorKeywords %in% topkeywords$AuthorKeywords, ]
+
+# Plot
+ggplot(keywordcounts, aes(YearPublished, Frequency, color = AuthorKeywords)) +
+    geom_line(aes(group = AuthorKeywords)) +
+    xlab("Year") + 
+    ylab("Count") + 
+    ggtitle("Most common keywords by year") +
+    scale_color_discrete(name="Keyword")
+```
