@@ -188,6 +188,9 @@ getName <- function(x) {
 # Information of a record in same format as in CitedReferences
 literature$ReferenceString <- apply(literature, 1, makeRef)
 
+# Add column for core literature
+literature$CoreLiterature <- FALSE
+
 # Remove duplicates
 literature <- literature[!duplicated(literature[, "ReferenceString"]), ]
 
