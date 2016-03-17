@@ -1,0 +1,56 @@
+---
+title: "Core literature extension"
+author: "Juho Salminen"
+date: "17 March 2016"
+output: html_document
+---
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+opts_chunk$set(echo=FALSE, message=FALSE, warning = FALSE)
+```
+
+```{r}
+library(ggplot2)
+source("create_network.R")
+
+core_file <- unlist(list.files("input/core", full.names = T))[1]
+new_file <-  unlist(list.files("input/new", full.names = T))[1]
+
+corelit <- read.csv(core_file, header = T, sep = ";", 
+                    stringsAsFactors = FALSE)
+newlit <- read.csv(new_file, header = T, sep = ";", 
+                   stringsAsFactors = FALSE)
+
+
+# UGLY HACK!
+corelit$CoreLiterature <- TRUE
+
+core_network <- create_network(corelit)
+core_nodes <- core_network[[1]]
+core_edges <- core_network[[2]]
+
+new_network <- create_network(newlit)
+new_nodes <- new_network[[1]]
+new_edges <- new_network[[2]]
+```
+
+```{r}
+core_ids <- core_nodes$Id[core_nodes$CoreLiterature == TRUE]
+new_edges$CoreCitations <- new_edges$Target %in% core_ids
+results <- aggregate(new_edges$CoreCitations, 
+                     by = list(Id = new_edges$Source), 
+                     FUN = sum, na.rm = TRUE)
+names(results) <- c("Id", "CoreCitations")
+results <- merge(results, new_nodes, by = "Id")
+results$Article <- paste(toupper(results$DocumentTitle), " | ",
+                              results$FullReference, " | ", 
+                                      results$Abstract)
+
+results <- results[with (results, order(-CoreCitations)), ]
+top_results <- head(results[, c("Article", "CoreCitations", "TimesCited")], 100)
+kable(top_results)
+```
+
+
+
