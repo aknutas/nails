@@ -32,7 +32,22 @@ core_edges <- core_network[[2]]
 
 new_network <- create_network(newlit)
 new_nodes <- new_network[[1]]
+new_nodes$YearPublished <- as.numeric(as.character(new_nodes$YearPublished))
 new_edges <- new_network[[2]]
+
+
+# Calculate potential citations per year
+citations <- as.data.frame(table(core_nodes$YearPublished))
+names(citations) <- c("Year", "Freq")
+citations$Year <- as.numeric(as.character(citations$Year))
+citations$Cumulative <- cumsum(citations$Freq)
+citations <- citations[!is.na(citations$Year), ]
+
+get_cumsum <- function(x) {
+    return(max(citations$Cumulative[citations$Year < x]))
+} 
+new_nodes$PotentialCitations <- sapply(new_nodes$YearPublished, get_cumsum)
+
 ```
 
 ```{r}
@@ -46,9 +61,11 @@ results <- merge(results, new_nodes, by = "Id")
 results$Article <- paste(toupper(results$DocumentTitle), " | ",
                               results$FullReference, " | ", 
                                       results$Abstract)
+results$Ratio <- results$CoreCitations / results$PotentialCitations
 
 results <- results[with (results, order(-CoreCitations)), ]
-top_results <- head(results[, c("Article", "CoreCitations", "TimesCited")], 100)
+top_results <- head(results[, c("Article", "CoreCitations", "TimesCited", 
+                                "Ratio")], 100)
 kable(top_results)
 ```
 
