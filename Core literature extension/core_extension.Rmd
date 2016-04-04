@@ -63,7 +63,7 @@ results$Article <- paste(toupper(results$DocumentTitle), " | ",
                                       results$Abstract)
 results$Ratio <- results$CoreCitations / results$PotentialCitations
 
-results <- results[with (results, order(-CoreCitations)), ]
+results <- results[with (results, order(-Ratio)), ]
 top_results <- head(results[, c("Article", "CoreCitations", "TimesCited", 
                                 "Ratio")], 100)
 kable(top_results)
