@@ -107,15 +107,14 @@ literature$DOI <- toupper(literature$DOI)
 
 # Locations
 literature$AuthorAddress <- as.character(literature$AuthorAddress)
-testcase <- literature$AuthorAddress[19]
-
-
 
 get_location <- function(x) {
     country <- NA
+    city <- NA
     if (x != "") {
         x <- gsub("\\[.*?\\]", "", x)
         x <- unlist(strsplit(x, ";"))
+        x <- x[x != " "]
         cities <- sapply(x, function(x) tail(unlist(strsplit(x, ",")), 2))
         city <- apply(cities, 2, function(x) gsub(".*[0-9]+ ", "", x[1]))
         city <- sapply(city, trim)
