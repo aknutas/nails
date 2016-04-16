@@ -520,8 +520,11 @@ names(nodes) <- c("Source", "Target")
 nodes$id <- rep(literature$id, nodelengths)
 nodes$Type <- rep("Undirected", nrow(nodes))
 
-# Remove NAs from Source column
+# Remove NAs and empty cells from Source and Target columns
 nodes <- nodes[!is.na(nodes$Source), ]
+nodes <- nodes[!is.na(nodes$Target), ]
+nodes <- nodes[nodes$Source != "", ]
+nodes <- nodes[nodes$Target != "", ]
 
 # Remove leading and trailing whitespace from Sources and Targets
 nodes$Source <- trim(nodes$Source)
