@@ -259,7 +259,7 @@ citationNodes$InDegree <- degree(citationGraph, mode = "in")
 citationsLit <- citationNodes[citationNodes$Origin == "literature", ]
 citationsLit <- merge(citationsLit, 
                       literature[, c("ReferenceString", 
-                                     "DocumentTitle", "Abstract")], 
+                                     "DocumentTitle")], 
                        by.x = "FullReference", by.y = "ReferenceString")
 citationsLit$Article <- paste(toupper(citationsLit$DocumentTitle), " | ",
                               citationsLit$FullReference, " | ", 
