@@ -29,6 +29,8 @@ years <- read.table("analyze.csv", sep = ";", header = T)
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
 # Fixing variable types
+# (Manual conversion to chararcters could be avoided by setting 
+# stringsAsFactors=FALSE in read.delim() function in cleaning2.R. Oh well.)
 literature$AuthorFullName <- as.character(literature$AuthorFullName)
 literatureByAuthor$AuthorFullName <- as.character(literatureByAuthor$AuthorFullName)
 literatureByKeywords$AuthorFullName <- as.character(literatureByKeywords$AuthorFullName)
@@ -65,12 +67,15 @@ ggplot(literature, aes(YearPublished)) +
   ylab("Article count")
 
 # Calculate relative publication counts
-yearTable <- table(literature$YearPublished)
-yearDF <- as.data.frame(yearTable)
-names(yearDF) <- c("Year", "Freq")
+yearTable <- table(literature$YearPublished)    # Tabulate publication years
+yearDF <- as.data.frame(yearTable)              # Turn to dataframe
+names(yearDF) <- c("Year", "Freq")              # Fix column names
+
+# Merge to dataframe of total publication numbers (years)
 yearDF <- merge(yearDF, years, by.x = "Year", by.y = "Year")
-yearDF$Year <- as.numeric(as.character(yearDF$Year))
-yearDF$Fraction <- yearDF$Freq / yearDF$Records
+yearDF$Year <- as.numeric(as.character(yearDF$Year))    # factor to numeric
+# Calculate published articles per total articles by year
+yearDF$Fraction <- yearDF$Freq / yearDF$Records         
 ```
 
 ## Relative publication volume
@@ -128,7 +133,8 @@ ggplot(authorsPop, aes(AuthorFullName, Freq)) +
 ```{r,echo=FALSE}
 # Reorder AuthorFullName factor according to TotalTimesCited (decreasing order)
 authors <- transform(authors, 
-                            AuthorFullName = reorder(AuthorFullName, TotalTimesCited))
+                            AuthorFullName = reorder(AuthorFullName, 
+                                                     TotalTimesCited))
 
 ggplot(head(authors, 25), aes(AuthorFullName, TotalTimesCited)) + 
     geom_bar(stat = "identity", fill = "blue") +
@@ -173,7 +179,8 @@ ggplot(head(publications, 25), aes(Publication, Count)) +
 
 ```{r,echo=FALSE}
 top25 <- transform(top25, 
-                          PublicationName = reorder(PublicationName, PublicationTotalCitations))
+                          PublicationName = reorder(PublicationName, 
+                                                    PublicationTotalCitations))
 ggplot(top25, 
        aes(PublicationName, PublicationTotalCitations)) + 
     geom_bar(stat = "identity", fill = "orange") + 
@@ -189,6 +196,10 @@ Sorted by the number of articles where the keyword is mentioned and by the total
 ```{r, echo=FALSE}
 # Calculating total citations for each keyword
 # Functionality same as for the authors, see above.
+
+# Sometimes AuthorKeywords column is empty. 
+# Following if-else hack prevents crashing in those situations, 
+# either by using KeywordsPlus column or skipping keyword analysis.
 if (using_KeywordsPlus == TRUE) {
   cat("No keywords. Using KeywordsPlus instead.")
   names(literature)[c(21, 22)] <- c("AuthorKeywordsTemp", "AuthorKeywords")
@@ -197,9 +208,11 @@ if (using_KeywordsPlus == TRUE) {
 if (nrow(literatureByKeywords) == 0) {
   cat("No keywords")
 } else {
+  # Below functionality same as above for important authors.
   keywordCitationSum <- aggregate(literatureByKeywords$TimesCited, 
                                 by = list(AuthorKeywords = 
-                            literatureByKeywords$AuthorKeywords), FUN = sum, na.rm = T)
+                            literatureByKeywords$AuthorKeywords), FUN = sum, 
+                            na.rm = T)
   names(keywordCitationSum) <- c("AuthorKeywords", "TotalTimesCited")
 
   keywords <- unlist(strsplit(literature$AuthorKeywords, ";"))
@@ -238,7 +251,6 @@ if (nrow(literatureByKeywords) > 0) {
 
 # Change the column names back to original ones
 names(literature)[c(21, 22)] <- c("AuthorKeywords", "KeywordsPlus")
-
 ```
 
 ## Important papers
@@ -257,14 +269,17 @@ citationNodes$InDegree <- degree(citationGraph, mode = "in")
 # Extract the articles included in the data set and articles not included
 # in the dataset
 citationsLit <- citationNodes[citationNodes$Origin == "literature", ]
+citationsRef <- citationNodes[citationNodes$Origin == "reference", ]
+# Merge with selected columns in literature data frame
 citationsLit <- merge(citationsLit, 
                       literature[, c("ReferenceString", 
                                      "DocumentTitle")], 
                        by.x = "FullReference", by.y = "ReferenceString")
+# Create article strings (document title, reference information and abstract
+# separated by "|")
 citationsLit$Article <- paste(toupper(citationsLit$DocumentTitle), " | ",
                               citationsLit$FullReference, " | ", 
                                       citationsLit$Abstract)
-citationsRef <- citationNodes[citationNodes$Origin == "reference", ]
 
 # Trim FullReference to 100 characters
 citationsLit$FullReference <- strtrim(citationsLit$FullReference, 100)
@@ -274,26 +289,42 @@ citationsRef$FullReference <- strtrim(citationsRef$FullReference, 100)
 ### Included in the dataset
 These papers were included in the `r nrow(literature)` records downloaded from the Web of Science.
 ```{r, echo=FALSE}
+# Sort citationsLit by TimesCited, decreasing
 citationsLit <- citationsLit[with (citationsLit, order(-TimesCited)), ]
+# Extract top 25
 topLit <- head(citationsLit, 25)
+# Sort by InDegree, decreasing
 citationsLit <- citationsLit[with (citationsLit, order(-InDegree)), ]
+# Add to list of top 25 most cited papers
 topLit <- rbind(topLit, head(citationsLit, 25))
+# Sort by PageRank, decreasing
 citationsLit <- citationsLit[with (citationsLit, order(-PageRank)), ]
+# Add to list of most cited and highest InDegree papers
 topLit <- rbind(topLit, head(citationsLit, 25))
+# Remove duplicates
 topLit <- topLit[!duplicated(topLit[, "FullReference"]), ]
+# Sort topLit by InDegree, break ties by TimesCited, then PageRank.
 topLit <- topLit[with (topLit, order(-InDegree, -TimesCited, -PageRank)), ]
+# Print list
 kable(topLit[, c("Article", "InDegree", "TimesCited","PageRank")])
 ```
 
 ### Not included in the dataset
 These papers and other references were not among the `r nrow(literature)` records downloaded from the Web of Science.
 ```{r, echo=FALSE}
+# Sort citationsRef by InDegree, decreasing
 citationsRef <- citationsRef[with (citationsRef, order(-InDegree)), ]
+# Extract top 25
 topRef <- head(citationsRef, 25)
+# Sort by PageRank, decreasing
 citationsRef <- citationsRef[with (citationsRef, order(-PageRank)), ]
+# Add to list of highes in degree papers (references)
 topRef <- rbind(topRef, head(citationsRef, 25))
+# Remove duplicates
 topRef <- topRef[!duplicated(topRef[, "FullReference"]), ]
+# Sort by InDegree, break ties by PageRank
 topRef <- topRef[with (topRef, order(-InDegree, -PageRank)), ]
+# Print results
 kable(topRef[, c("FullReference", "InDegree", "PageRank")])
 ```
 
