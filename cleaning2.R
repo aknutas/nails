@@ -22,6 +22,7 @@ filelist <- list.files("input", full.names = T)
 rm(literature)
 
 # Load files in the input folder and merge into a single file
+# Ugly but works. 
 for (file in filelist) {
     if (!exists("literature")) {
         literature <- read.delim2(file, header = T, 
@@ -45,7 +46,7 @@ for (file in filelist) {
     }
 }
 
-# Add id variable
+# Create and add id variable
 id <- c(1:nrow(literature))
 ids <- data.frame(id = id)
 literature = cbind(ids, literature)
@@ -55,10 +56,13 @@ literature = cbind(ids, literature)
 # Cleaning data
 
 # Fix variable names
-tags <- names(literature)
+tags <- names(literature)       # Extract column names
+# Match column names (acronyms) with full column names
 fields <- as.character(fieldtags$field[match(tags, fieldtags$tag)])
 fields[is.na(fields)] <- tags[is.na(fields)]     # Throws warnings but seems to be working
-fields <- gsub(" ", "", fields)
+fields <- gsub(" ", "", fields)         # Remove spaces
+
+# Change literature column names and fix weird names
 names(literature) <- fields
 names(literature)[names(literature) == "KeywordsPlus\xfc\xbe\x8e\x86\x84\xbc"] <- "KeywordsPlus"
 names(literature)[names(literature) == "PublicationType(conference,book,journal,bookinseries,orpatent)"] <- "PublicationType"
@@ -68,9 +72,13 @@ names(literature)[names(literature) == "DigitalObjectIdentifier(DOI)" ] <- "DOI"
 # Helper function to remove leading and trailing whitespace
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
-# Fixing variable types
+# Fixing variable types, removing quotes, uppercasing, lowercasing, etc.
+# mist fixes.
+# (Future development: add stringsAsFactors=FALSE to read.delim2() above
+# to avoid manual conversions to characters)
 literature$AuthorFullName <- as.character(literature$AuthorFullName)
 literature$AuthorFullName <- toupper(literature$AuthorFullName)
+
 literature$AuthorFullName <- gsub("'", "", literature$AuthorFullName)
 literature$AuthorFullName <- gsub('"', "", literature$AuthorFullName)
 
@@ -108,6 +116,7 @@ literature$DOI <- toupper(literature$DOI)
 # Locations
 literature$AuthorAddress <- as.character(literature$AuthorAddress)
 
+# Helper function for extracting countries and cities from AuthorAddress
 get_location <- function(x) {
     country <- NA
     city <- NA
@@ -127,20 +136,26 @@ get_location <- function(x) {
     }
 }
 
+# Extract cities and countries
 literature$Locations <- sapply(literature$AuthorAddress, get_location)
+# Split locations by ";
 locationList <- unlist(lapply(literature$Locations,
                               function(x) strsplit(x, ";")))
 
-locations <- data.frame(location = locationList)
-locations$location <- as.character(locations$location)
-locations$city <- gsub(",.*", "", locations$location)
-locations$country <- gsub(".*,", "", locations$location)
+locations <- data.frame(location = locationList)        # Create data frame
+locations$location <- as.character(locations$location)  # To chararcter type
+locations$city <- gsub(",.*", "", locations$location)   # Remove country from location
+locations$country <- gsub(".*,", "", locations$location) # Remove city from location
 
+# Save locations
 write.table(locations, "output/locations.csv", 
             sep = ";", row.names = F, qmethod = "double")
 
 # Creating reference strings
 
+# Limit author list to 10000 characters. 
+# Long list of authors => MASSIVE number of connections between them, 
+# as in 300+ MB list of connected author pairs
 literature <- literature[nchar(literature$AuthorFullName) < 10000, ]
 
 # Helper function to construct strings
@@ -298,7 +313,6 @@ write.table(literatureByCategory, "output/literature_by_subject.csv",
 ###############################################################################
 
 # Helper function to extract DOIs
-
 getDOIs <- function(x) {
     if (length(x) == 2) {
         return(x[2])
