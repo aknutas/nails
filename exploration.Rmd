@@ -328,3 +328,20 @@ topRef <- topRef[with (topRef, order(-InDegree, -PageRank)), ]
 kable(topRef[, c("FullReference", "InDegree", "PageRank")])
 ```
 
+```{r, results='asis', echo=FALSE}
+if (enableTM) {
+cat('### Topic modeling output
+[Topic modeling](https://en.wikipedia.org/wiki/Topic_model) is a type of statistical text mining method for discovering common "topics" that occur in a collection of documents. A topic modeling algorithm essentially looks through the abstracts included in the datasets for clusters of co-occurring of words and groups them together by a process of similarity.
+
+The following columns describe each topic detected using [LDA topic modeling](http://blog.echen.me/2011/08/22/introduction-to-latent-dirichlet-allocation/) by listing the ten most characteristic words in each topic. See also the [interactive visualization](output/topicmodelvis/index.html) for a better characterization of the topics and a visual representation of how (dis)similar the detected topics are to each other.
+')
+}
+```
+
+```{r, echo=FALSE}
+if (enableTM) {
+  tw <- data.frame(topwords)
+  colnames(tw) <- gsub('X', 'Topic ', colnames(tw))
+  kable(tw, col.names = colnames(tw))
+}
+```
