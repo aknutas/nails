@@ -208,6 +208,26 @@ literature$CoreLiterature <- FALSE
 # Remove duplicates
 literature <- literature[!duplicated(literature[, "ReferenceString"]), ]
 
+###############################################################################
+
+# Do topic modeling on abstracts using the lda libraries (adding them as a new column)
+source("topicmodel.R", chdir = T)
+
+# Add top topic to main document
+literature$TopicModelTopic <- tfdDF$toptopic
+
+# Save the topic model topic descriptions
+write.table(topwords, "output/topicmodeltopics.csv", 
+            sep = ";", row.names = F, qmethod = "double")
+
+# HTML output
+serVis(json, out.dir = 'output/topicmodelvis', open.browser = FALSE)
+
+# Freeing up memory
+rm(json)
+
+###############################################################################
+
 # Save the literature as a single csv-file literature.csv.
 write.table(literature, "output/literature.csv", 
             sep = ";", row.names = F, qmethod = "double")
