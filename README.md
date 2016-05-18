@@ -37,3 +37,6 @@ networks that can be loaded to Gephi for further exploration.
 
 See further instructions for manual usage at https://sites.google.com/site/bibliometricdatavisualization/instructions
 
+Requirements
+----
+For now the project works on R version 3.2.
