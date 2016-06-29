@@ -6,13 +6,13 @@ suppressPackageStartupMessages(library(plyr))
 library(stringr)
 
 # Set working directory to folder containing folders named "input" and "output.
-# Input folder should contain full records and citations downloaded from 
-# Web of knowledge in tab-delimited (UTF-16) format. Working directory should 
+# Input folder should contain full records and citations downloaded from
+# Web of knowledge in tab-delimited (UTF-16) format. Working directory should
 # contain the list of fieldtags for naming the variables (fieldtags.csv).
 ###############################################################################
 
 # Load variable names
-fieldtags <- read.csv("fieldtags.csv", header = T, 
+fieldtags <- read.csv("fieldtags.csv", header = T,
                       sep = ";")
 
 # List files in input folder
@@ -21,12 +21,15 @@ filelist <- list.files("input", full.names = T)
 # Remove possible old literature data frame
 rm(literature)
 
+# Check whether to use topic modeling
+enableTM <- file.exists('enabletm')
+
 # Load files in the input folder and merge into a single file
-# Ugly but works. 
+# Ugly but works.
 for (file in filelist) {
     if (!exists("literature")) {
-        literature <- read.delim2(file, header = T, 
-                                  fileEncoding = "UTF-16", row.names = NULL, 
+        literature <- read.delim2(file, header = T,
+                                  fileEncoding = "UTF-16", row.names = NULL,
                                   quote = "")
         # Fix misplaced column names
         data.names <- names(literature)[2:length(names(literature))]
@@ -34,8 +37,8 @@ for (file in filelist) {
         names(literature) <- data.names
     }
     else {
-        literature2 <- read.delim2(file, header = T, 
-                                   fileEncoding = "UTF-16", row.names = NULL, 
+        literature2 <- read.delim2(file, header = T,
+                                   fileEncoding = "UTF-16", row.names = NULL,
                                    quote = "")
         # Fix misplaced column names
         data.names <- names(literature2)[2:length(names(literature2))]
@@ -101,8 +104,8 @@ literature$DocumentTitle <- gsub('"', "", literature$DocumentTitle)
 
 literature$SubjectCategory <- as.character(literature$SubjectCategory)
 literature$SubjectCategory <- tolower(literature$SubjectCategory)
-literature$SubjectCategory <- gsub("'", "", literature$SubjectCategory) 
-literature$SubjectCategory <- gsub('"', "", literature$SubjectCategory) 
+literature$SubjectCategory <- gsub("'", "", literature$SubjectCategory)
+literature$SubjectCategory <- gsub('"', "", literature$SubjectCategory)
 
 literature$CitedReferences <- as.character(literature$CitedReferences)
 literature$CitedReferences <- gsub("'", "", literature$CitedReferences)
@@ -132,7 +135,7 @@ get_location <- function(x) {
         return(paste(paste(city, country, sep = ","), collapse = ";"))
   }
     else {
-        return(NA)   
+        return(NA)
     }
 }
 
@@ -148,13 +151,13 @@ locations$city <- gsub(",.*", "", locations$location)   # Remove country from lo
 locations$country <- gsub(".*,", "", locations$location) # Remove city from location
 
 # Save locations
-write.table(locations, "output/locations.csv", 
+write.table(locations, "output/locations.csv",
             sep = ";", row.names = F, qmethod = "double")
 
 # Creating reference strings
 
-# Limit author list to 10000 characters. 
-# Long list of authors => MASSIVE number of connections between them, 
+# Limit author list to 10000 characters.
+# Long list of authors => MASSIVE number of connections between them,
 # as in 300+ MB list of connected author pairs
 literature <- literature[nchar(literature$AuthorFullName) < 10000, ]
 
@@ -193,7 +196,7 @@ getName <- function(x) {
         }
         if (length(names) > 2) {
             name <- paste(name, substring(names[3], 1, 1), sep = "")
-        } 
+        }
     } )
     return(name)
 }
@@ -208,28 +211,33 @@ literature$CoreLiterature <- FALSE
 # Remove duplicates
 literature <- literature[!duplicated(literature[, "ReferenceString"]), ]
 
+
 ###############################################################################
 
-# Do topic modeling on abstracts using the lda libraries (adding them as a new column)
-source("topicmodel.R", chdir = T)
+# Do if topicmodeling enabled
 
-# Add top topic to main document
-literature$TopicModelTopic <- tfdDF$toptopic
+if (enableTM) {
+  # Do topic modeling on abstracts using the lda libraries (adding them as a new column)
+  source("topicmodel.R", chdir = T)
 
-# Save the topic model topic descriptions
-write.table(topwords, "output/topicmodeltopics.csv", 
-            sep = ";", row.names = F, qmethod = "double")
+  # Add top topic to main document
+  literature$TopicModelTopic <- tfdDF$toptopic
 
-# HTML output
-serVis(json, out.dir = 'output/topicmodelvis', open.browser = FALSE)
+  # Save the topic model topic descriptions
+  write.table(topwords, "output/topicmodeltopics.csv",
+              sep = ";", row.names = F, qmethod = "double")
 
-# Freeing up memory
-rm(json)
+  # HTML output
+  serVis(json, out.dir = 'output/topicmodelvis', open.browser = FALSE)
+
+  # Freeing up memory
+  rm(json)
+}
 
 ###############################################################################
 
 # Save the literature as a single csv-file literature.csv.
-write.table(literature, "output/literature.csv", 
+write.table(literature, "output/literature.csv",
             sep = ";", row.names = F, qmethod = "double")
 
 ###############################################################################
@@ -237,28 +245,28 @@ write.table(literature, "output/literature.csv",
 # Create a new data frame, where each author is in a separate row
 
 # Subset data
-literatureByAuthor = subset(literature, 
+literatureByAuthor = subset(literature,
                             select = c("AuthorFullName", "id"))
 # Remove NAs
 literatureByAuthor <- literatureByAuthor[
     !is.na(literatureByAuthor$AuthorFullName),]
-# Create data frame: AuthorFullName split by ";", each name on a new row, 
+# Create data frame: AuthorFullName split by ";", each name on a new row,
 # id copied to new rows
-literatureByAuthor <- cSplit(literatureByAuthor, 
-                                            splitCols = "AuthorFullName", 
+literatureByAuthor <- cSplit(literatureByAuthor,
+                                            splitCols = "AuthorFullName",
                                             sep = ";", direction = "long")
 # Removing rows with NA as author name created in previous step
 literatureByAuthor <- literatureByAuthor[
     !is.na(literatureByAuthor$AuthorFullName),]
 # Drop weird extra column created in previous step
-literatureByAuthor <- subset(literatureByAuthor, 
+literatureByAuthor <- subset(literatureByAuthor,
                              select = c("id", "AuthorFullName"))
 # Merge the rest of the data by id
-literatureByAuthor <- merge(literatureByAuthor, 
-                            subset(literature, select = -c(AuthorFullName)), 
+literatureByAuthor <- merge(literatureByAuthor,
+                            subset(literature, select = -c(AuthorFullName)),
                             by = "id")
 # Save file
-write.table(literatureByAuthor, "output/literature_by_author.csv", 
+write.table(literatureByAuthor, "output/literature_by_author.csv",
             row.names = F, sep = ';', qmethod = "double")
 
 ###############################################################################
@@ -266,18 +274,18 @@ write.table(literatureByAuthor, "output/literature_by_author.csv",
 # Create a new data frame, where each keyword is in a separate row.
 # Same functionality as with the author names, see above.
 
-literatureByKeywords <- subset(literature, 
+literatureByKeywords <- subset(literature,
                                select = c("AuthorKeywords", "id"))
 literatureByKeywords <- literatureByKeywords[
     !is.na(literatureByKeywords$AuthorKeywords),]
 literatureByKeywords <- literatureByKeywords[
     literatureByKeywords$AuthorKeywords != "", ]
-using_KeywordsPlus = FALSE  
+using_KeywordsPlus = FALSE
 
 if (nrow(literatureByKeywords) == 0) {
-  literatureByKeywords <- subset(literature, 
+  literatureByKeywords <- subset(literature,
                                  select = c("KeywordsPlus", "id"))
-  names(literatureByKeywords)[1] <- "AuthorKeywords" 
+  names(literatureByKeywords)[1] <- "AuthorKeywords"
   literatureByKeywords <- literatureByKeywords[
     !is.na(literatureByKeywords$AuthorKeywords),]
   literatureByKeywords <- literatureByKeywords[
@@ -286,20 +294,20 @@ if (nrow(literatureByKeywords) == 0) {
 }
 
 if (nrow(literatureByKeywords) > 0) {
-  literatureByKeywords <- cSplit(literatureByKeywords, 
-                                 splitCols = "AuthorKeywords", 
+  literatureByKeywords <- cSplit(literatureByKeywords,
+                                 splitCols = "AuthorKeywords",
                                  sep = ";", direction = "long")
   literatureByKeywords <- literatureByKeywords[
     !is.na(literatureByKeywords$AuthorKeywords),]
-  literatureByKeywords <- subset(literatureByKeywords, 
+  literatureByKeywords <- subset(literatureByKeywords,
                                  select = c("id", "AuthorKeywords"))
-  literatureByKeywords <- merge(literatureByKeywords, 
-                                subset(literature, select = -c(AuthorKeywords)), 
+  literatureByKeywords <- merge(literatureByKeywords,
+                                subset(literature, select = -c(AuthorKeywords)),
                                 by = "id")
 }
 
 # Save file
-write.table(literatureByKeywords, "output/literature_by_keywords.csv", 
+write.table(literatureByKeywords, "output/literature_by_keywords.csv",
             row.names = F, sep = ';', qmethod = "double")
 
 ###############################################################################
@@ -307,27 +315,27 @@ write.table(literatureByKeywords, "output/literature_by_keywords.csv",
 # Create new data frame, where each subject category is in a separate row.
 # Same functionality as with the author names, see above.
 
-literatureByCategory <- subset(literature, 
+literatureByCategory <- subset(literature,
                                select = c("SubjectCategory", "id"))
 
 literatureByCategory <- literatureByCategory[
     !is.na(literatureByCategory$SubjectCategory),]
 literatureByCategory <- literatureByCategory[
     literatureByCategory$SubjectCategory != "", ]
-literatureByCategory <- cSplit(literatureByCategory, 
-                                              splitCols = "SubjectCategory", 
+literatureByCategory <- cSplit(literatureByCategory,
+                                              splitCols = "SubjectCategory",
                                               sep = ";", direction = "long")
 literatureByCategory <- literatureByCategory[
     !is.na(literatureByCategory$SubjectCategory),]
-literatureByCategory <- subset(literatureByCategory, 
+literatureByCategory <- subset(literatureByCategory,
                                select = c("id", "SubjectCategory"))
-literatureByCategory <- merge(literatureByCategory, 
-                              subset(literature, select = -c(SubjectCategory)), 
+literatureByCategory <- merge(literatureByCategory,
+                              subset(literature, select = -c(SubjectCategory)),
                               by = "id")
-literatureByCategory$SubjectCategory <- trim(literatureByCategory$SubjectCategory) 
+literatureByCategory$SubjectCategory <- trim(literatureByCategory$SubjectCategory)
 
 # Save file
-write.table(literatureByCategory, "output/literature_by_subject.csv", 
+write.table(literatureByCategory, "output/literature_by_subject.csv",
             row.names = F, sep = ';', qmethod = "double")
 
 ###############################################################################
@@ -356,7 +364,7 @@ getYear <- function(x) {
 
 # Create a new data frame, where each cited reference is in a separate row
 
-# Create data frame: CitedReferences split by ";", each reference on a new row, 
+# Create data frame: CitedReferences split by ";", each reference on a new row,
 # id copied to new rows
 
 referencelist <- strsplit(literature$CitedReferences, ";")
@@ -374,14 +382,14 @@ refYear <- strsplit(referencelist, ",")
 refYear <- sapply(refYear, getYear)
 
 # Create data frame with references and ids and merge literature to it
-referencedf <- data.frame(Reference = references, id = id, 
+referencedf <- data.frame(Reference = references, id = id,
                           FullReference = referencelist)
 referencedf <- merge(referencedf, literature, by = "id")
 
 
 # Create data frame of nodes from references
-citationNodes <- data.frame(Id = referencedf$Reference, 
-                            YearPublished = refYear,  
+citationNodes <- data.frame(Id = referencedf$Reference,
+                            YearPublished = refYear,
                             FullReference = referencelist,
                             id = NA,
                             PublicationType = NA,
@@ -406,8 +414,8 @@ citationNodes$Id[is.na(citationNodes$Id)] <- citationNodes$FullReference[is.na(c
 citationNodes$Origin <- rep("reference", nrow(citationNodes))
 
 # Create data frame of nodes from literature records
-literatureNodes <- data.frame(Id = literature$DOI, 
-                              YearPublished = literature$YearPublished, 
+literatureNodes <- data.frame(Id = literature$DOI,
+                              YearPublished = literature$YearPublished,
                               FullReference = literature$ReferenceString)
 literatureNodes <- subset(literature, select = c(DOI,
                                                  YearPublished,
@@ -451,7 +459,7 @@ citationNodes$Label <- citationNodes$Id
 
 
 # Save node table
-write.table(citationNodes, "output/citation_nodes.csv", 
+write.table(citationNodes, "output/citation_nodes.csv",
             sep = ';', row.names = F)
 
 ###############################################################################
@@ -465,10 +473,10 @@ referencedf$ReferenceString <- as.character(referencedf$ReferenceString)
 referencedf$FullReference <- as.character(referencedf$FullReference)
 
 # Create table
-citationEdges <- data.frame(Source = referencedf$DOI, 
-                            Target = referencedf$Reference, 
-                            id = referencedf$id, 
-                            YearPublished = referencedf$YearPublished, 
+citationEdges <- data.frame(Source = referencedf$DOI,
+                            Target = referencedf$Reference,
+                            id = referencedf$id,
+                            YearPublished = referencedf$YearPublished,
                             DocumentTitle = referencedf$DocumentTitle)
 citationEdges$Source <- as.character(citationEdges$Source)
 citationEdges$Target <- as.character(citationEdges$Target)
@@ -479,7 +487,7 @@ citationEdges$Source[noSource] <- referencedf$ReferenceString[noSource]
 citationEdges$Target[noTarget] <- referencedf$FullReference[noTarget]
 
 # Save citaion edge table
-write.table(citationEdges, "output/citation_edges.csv", 
+write.table(citationEdges, "output/citation_edges.csv",
             sep = ';', row.names = F)
 
 ###############################################################################
@@ -487,8 +495,8 @@ write.table(citationEdges, "output/citation_edges.csv",
 # Create node and edge tables for author network
 
 # Calculating total number of citations for each author
-citationSums <- aggregate(literatureByAuthor$TimesCited, 
-                          by = list(AuthorFullName = toupper(literatureByAuthor$AuthorFullName)), 
+citationSums <- aggregate(literatureByAuthor$TimesCited,
+                          by = list(AuthorFullName = toupper(literatureByAuthor$AuthorFullName)),
                           FUN = sum)
 
 # Fixing column names
@@ -496,7 +504,7 @@ names(citationSums) <- c("AuthorFullName", "TotalTimesCited")
 
 # Creating new data frame to plot citations by author
 
-# Extract author names 
+# Extract author names
 authorNames <- unlist(strsplit(literature$AuthorFullName, ";"))
 authorNames <- trim(authorNames)
 # Count author name frequencies
@@ -504,10 +512,10 @@ authors <- table(authorNames)
 # Transform to a data frame
 authors <- as.data.frame(authors)
 # Merge with data frame containing the total times citated by each author
-authors <- merge(authors, citationSums, by.x = "authorNames", 
+authors <- merge(authors, citationSums, by.x = "authorNames",
                  by.y = "AuthorFullName" )
 # Fix column name
-names(authors)[1] <- "AuthorFullName" 
+names(authors)[1] <- "AuthorFullName"
 
 # Remove leading and trailing whitespace
 authors$AuthorFullName <- trim(authors$AuthorFullName)
@@ -517,7 +525,7 @@ names(authors)[1] <- "Id"
 authors$Label <- authors$Id
 
 # Save author node table
-write.table(authors, "output/author_nodes.csv", 
+write.table(authors, "output/author_nodes.csv",
             sep = ';', quote = F, row.names = F)
 
 # Helper functions for extracting edges
@@ -565,17 +573,17 @@ nodes$Source <- trim(nodes$Source)
 nodes$Target <- trim(nodes$Target)
 
 # Merge with literature
-nodes <- merge(nodes, subset(literature, select = -c(Authors, AuthorFullName)), 
+nodes <- merge(nodes, subset(literature, select = -c(Authors, AuthorFullName)),
                by.x = "id", by.y = "id")
 
 # Subset data. Use this to select columns to include in network data
-nodes <- subset(nodes, 
+nodes <- subset(nodes,
                 select = c("Source", "Target", "Type", "id",          # Don't change
                            "YearPublished", "DocumentTitle", "DOI",   # Change
-                           "TimesCited"))                                  
+                           "TimesCited"))
 
 # Save author edge table
-write.table(nodes, "output/author_edges.csv", 
+write.table(nodes, "output/author_edges.csv",
             sep = ';', row.names = F)
 
 

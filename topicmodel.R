@@ -1,3 +1,4 @@
+
 ###############################################################################
 
 # Do topic modeling on abstracts using the lda libraries
@@ -56,7 +57,7 @@ N <- sum(doc.length)  # total number of tokens in the data (546,827)
 term.frequency <- as.integer(term.table)  # frequencies of terms in the corpus [8939, 5544, 2411, 2410, 2143, ...]
 
 # MCMC and model tuning parameters
-K <- 6 # number of topics 
+K <- 6 # number of topics
 G <- 2500 # iterations
 alpha <- 0.166 # 1 / K
 eta <- 0.166 # 1 / K
@@ -64,8 +65,8 @@ eta <- 0.166 # 1 / K
 # Fit the model
 set.seed(357)
 
-fit <- lda.collapsed.gibbs.sampler(documents = documents, K = K, vocab = vocab, 
-                                   num.iterations = G, alpha = alpha, 
+fit <- lda.collapsed.gibbs.sampler(documents = documents, K = K, vocab = vocab,
+                                   num.iterations = G, alpha = alpha,
                                    eta = eta, initial = NULL, burnin = 0,
                                    compute.log.likelihood = TRUE)
 
@@ -93,10 +94,10 @@ TopicModel    <- list(phi = phi,
 
 
 # create the JSON object to feed the visualization
-json <- createJSON(phi = TopicModel$phi, 
-                   theta = TopicModel$theta, 
-                   doc.length = TopicModel$doc.length, 
-                   vocab = TopicModel$vocab, 
+json <- createJSON(phi = TopicModel$phi,
+                   theta = TopicModel$theta,
+                   doc.length = TopicModel$doc.length,
+                   vocab = TopicModel$vocab,
                    term.frequency = TopicModel$term.frequency)
 
 # Freeing up memory
@@ -105,3 +106,4 @@ rm(documents)
 rm(vocab)
 rm(TopicModel)
 rm(fit)
+
