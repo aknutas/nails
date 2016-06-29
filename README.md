@@ -39,4 +39,4 @@ See further instructions for manual usage at https://sites.google.com/site/bibli
 
 Requirements
 ----
-For now the project works on R version 3.2.
+For now the project verifiedly works on R version 3.2.0.
