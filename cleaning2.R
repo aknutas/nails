@@ -22,7 +22,7 @@ filelist <- list.files("input", full.names = T)
 rm(literature)
 
 # Check whether to use topic modeling
-enableTM <- file.exists('enabletm')
+enableTM <- TRUE
 
 # Load files in the input folder and merge into a single file
 # Ugly but works.
