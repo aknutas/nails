@@ -159,8 +159,7 @@ top25$PublicationName <- strtrim(top25$PublicationName, 50)
 
 publications <- sort(table(literature$PublicationName), decreasing = T)
 publications <- as.data.frame(publications)
-publications$Publication <- row.names(publications)
-names(publications) <- c("Count", "Publication")
+names(publications) <- c("Publication", "Count")
 publications$Publication <- strtrim(publications$Publication, 50)
 publications <- transform(publications, Publication = reorder(Publication, Count))
 
@@ -337,6 +336,38 @@ The following columns describe each topic detected using [LDA topic modeling](ht
 ')
 }
 ```
+
+# Most referenced publications
+```{r, echo=FALSE}
+references <- unlist(strsplit(literature$CitedReferences, ";"))
+
+get_publication <- function(x) {
+    publication <- "Not found"
+    try(
+        publication <- unlist(strsplit(x, ","))[[3]],
+        silent = TRUE
+    )
+    return(publication)
+}
+
+refPublications <- sapply(references, get_publication)
+refPublications <- sapply(refPublications, trim)
+refPublications <- refPublications[refPublications != "Not found"]
+refPublications <- as.data.frame(sort(table(refPublications), decreasing = TRUE))
+
+names(refPublications) <- c("Publication", "Count")
+refPublications <- transform(refPublications, 
+                             Publication = reorder(Publication, Count))
+
+ggplot(head(refPublications, 25), aes(Publication, Count)) +
+    geom_bar(stat = "identity", fill = "orange") +
+    coord_flip() +
+    theme(legend.position = "none") +
+    ggtitle("Most referenced publications") +
+    xlab("Publication") +
+    ylab("Count")
+```
+
 
 ```{r, echo=FALSE}
 if (enableTM) {
