@@ -157,9 +157,11 @@ citationSums <- citationSums[with (citationSums, order(-PublicationTotalCitation
 top25 <- head(citationSums[,c("PublicationName", "PublicationTotalCitations")], 25)
 top25$PublicationName <- strtrim(top25$PublicationName, 50)
 
-publications <- sort(table(literature$PublicationName), decreasing = T)
+publications <- table(literature$PublicationName)
 publications <- as.data.frame(publications)
 names(publications) <- c("Publication", "Count")
+publications <- publications[with (publications, order(-Count)), ]
+
 publications$Publication <- strtrim(publications$Publication, 50)
 publications <- transform(publications, Publication = reorder(Publication, Count))
 
