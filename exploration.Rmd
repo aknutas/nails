@@ -10,6 +10,7 @@ library(splitstackshape)
 library(igraph)
 library(knitr)
 
+
 # Set ggplot theme
 theme_set(theme_minimal(12))
 ```

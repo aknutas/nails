@@ -116,6 +116,7 @@ literature$TimesCited <- as.numeric(as.character(literature$TimesCited))
 
 literature$DOI <- toupper(literature$DOI)
 
+
 # Locations
 literature$AuthorAddress <- as.character(literature$AuthorAddress)
 
