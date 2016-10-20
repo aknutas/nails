@@ -115,7 +115,7 @@ literature$CitedReferences <- gsub("DOI DOI", "DOI", literature$CitedReferences)
 literature$TimesCited <- as.numeric(as.character(literature$TimesCited))
 
 literature$DOI <- toupper(literature$DOI)
-
+literature$DOI[is.na(literature$DOI)] <- ""
 
 # Locations
 literature$AuthorAddress <- as.character(literature$AuthorAddress)
