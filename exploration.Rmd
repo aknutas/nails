@@ -355,9 +355,10 @@ get_publication <- function(x) {
 refPublications <- sapply(references, get_publication)
 refPublications <- sapply(refPublications, trim)
 refPublications <- refPublications[refPublications != "Not found"]
-refPublications <- as.data.frame(sort(table(refPublications), decreasing = TRUE))
-
+refPublications <- as.data.frame(table(refPublications))
 names(refPublications) <- c("Publication", "Count")
+refPublications <- refPublications[with (refPublications, order(-Count)), ]
+
 refPublications <- transform(refPublications, 
                              Publication = reorder(Publication, Count))
 
