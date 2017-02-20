@@ -1,3 +1,18 @@
+# Network Analysis Interface for Literature Studies
+# Copyright (C) 2017 Lappeenranta University of Technology and Juho Salminen
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 options(stringsAsFactors = FALSE)
 
@@ -30,7 +45,7 @@ literature$Index.Keywords <- gsub("; ", ";", literature$Index.Keywords)
 
 literature$References <- toupper(literature$References)
 
-# Change NAs to zeros 
+# Change NAs to zeros
 literature$Cited.by[is.na(literature$Cited.by)] <- 0
 
 # Create reference string
@@ -54,7 +69,7 @@ makeRef <- function(x) {
         reference <- paste(reference, " (", x["Issue"], ")", sep = "")
     }
     if (x["Page.start"] != "" & x["Page.end"] != "") {
-        reference <- paste(reference, ", PP. ", x["Page.start"], "-", 
+        reference <- paste(reference, ", PP. ", x["Page.start"], "-",
                            x["Page.end"], sep = "")
     }
     reference <- toupper(reference)
@@ -69,7 +84,7 @@ literature$ReferenceString <- apply(literature, 1, makeRef)
 literature <- literature[!duplicated(literature[, "ReferenceString"]), ]
 
 # Save the literature as a single csv-file literature.csv.
-write.table(literature, "output/literature.csv", 
+write.table(literature, "output/literature.csv",
             sep = ";", row.names = F, qmethod = "double")
 
 ################################################################################
@@ -77,20 +92,20 @@ write.table(literature, "output/literature.csv",
 # Create a new data frame, where each author is in a separate row
 
 # Subset data
-literatureByAuthor = subset(literature, 
+literatureByAuthor = subset(literature,
                             select = c("Authors", "id"))
 
-# Create data frame: Authors split by ";", each name on a new row, 
+# Create data frame: Authors split by ";", each name on a new row,
 # id copied to new rows
-literatureByAuthor <- cSplit(literatureByAuthor, 
-                                            splitCols = "Authors", 
+literatureByAuthor <- cSplit(literatureByAuthor,
+                                            splitCols = "Authors",
                                             sep = ",", direction = "long")
 
 # Merge the rest of the data by id
-literatureByAuthor <- merge(literatureByAuthor, literature[,-1], 
+literatureByAuthor <- merge(literatureByAuthor, literature[,-1],
                             by = "id")
 # Save file
-write.table(literatureByAuthor, "output/literature_by_author.csv", 
+write.table(literatureByAuthor, "output/literature_by_author.csv",
             row.names = F, sep = ';', qmethod = "double")
 
 ################################################################################
@@ -98,7 +113,7 @@ write.table(literatureByAuthor, "output/literature_by_author.csv",
 # Create a new data frame, where each keyword is in a separate row.
 # Same functionality as with the author names, see above.
 
-literatureByKeywords <- subset(literature, 
+literatureByKeywords <- subset(literature,
                                select = c("Author.Keywords", "id"))
 # Remove NAs and empty keywords
 literatureByKeywords <- literatureByKeywords[
@@ -106,17 +121,17 @@ literatureByKeywords <- literatureByKeywords[
 literatureByKeywords <- literatureByKeywords[
     literatureByKeywords$Author.Keywords != "", ]
 
-# Create data frame: Author.Keywords split by ";", each name on a new row, 
+# Create data frame: Author.Keywords split by ";", each name on a new row,
 # id copied to new rows
-literatureByKeywords <- cSplit(literatureByKeywords, 
-                                              splitCols = "Author.Keywords", 
+literatureByKeywords <- cSplit(literatureByKeywords,
+                                              splitCols = "Author.Keywords",
                                               sep = ";", direction = "long")
 
 # Merge the rest of the data by id
-literatureByKeywords <- merge(literatureByKeywords, literature[,-17], 
+literatureByKeywords <- merge(literatureByKeywords, literature[,-17],
                               by = "id")
 # Save file
-write.table(literatureByKeywords, "output/literature_by_keywords.csv", 
+write.table(literatureByKeywords, "output/literature_by_keywords.csv",
             row.names = F, sep = ';', qmethod = "double")
 
 ###############################################################################
@@ -124,7 +139,7 @@ write.table(literatureByKeywords, "output/literature_by_keywords.csv",
 # Create new data frame, where each index keyword is in a separate row.
 # Same functionality as with the author names, see above.
 
-literatureByIndex <- subset(literature, 
+literatureByIndex <- subset(literature,
                                select = c("Index.Keywords", "id"))
 
 # Remove NAs and empty keywords
@@ -133,28 +148,28 @@ literatureByIndex <- literatureByIndex[
 literatureByIndex <- literatureByIndex[
     literatureByIndex$Index.Keywords != "", ]
 
-# Create data frame: Index.Keywords split by ";", each name on a new row, 
+# Create data frame: Index.Keywords split by ";", each name on a new row,
 # id copied to new rows
-literatureByIndex <- cSplit(literatureByIndex, splitCols = "Index.Keywords", 
+literatureByIndex <- cSplit(literatureByIndex, splitCols = "Index.Keywords",
                                               sep = ";", direction = "long")
 
 # Merge to the rest of the data
-literatureByIndex <- merge(literatureByIndex, literature[,-18], 
+literatureByIndex <- merge(literatureByIndex, literature[,-18],
                               by = "id")
 
 # Save file
-write.table(literatureByIndex, "output/literature_by_index.csv", 
+write.table(literatureByIndex, "output/literature_by_index.csv",
             row.names = F, sep = ';', qmethod = "double")
 
 ###############################################################################
 
 # Create a new data frame, where each cited reference is in a separate row
 
-# Create data frame: References split by ";", each reference on a new row, 
+# Create data frame: References split by ";", each reference on a new row,
 # id copied to new rows
 references <- subset(literature, select = c("References", "id"))
 names(references) <- c("Reference", "id")
-references <- cSplit(references, splitCols = "Reference", sep = ";", 
+references <- cSplit(references, splitCols = "Reference", sep = ";",
                     direction = "long")
 
 # Merge to literature data
@@ -166,7 +181,7 @@ getYear <- function(x) {
     year <- NA
     try( {
         year <- sub("\\).*", "", x)
-        year <- as.numeric(sub(".*\\(", "", year)) 
+        year <- as.numeric(sub(".*\\(", "", year))
     })
     return(year)
 }
@@ -175,13 +190,13 @@ getYear <- function(x) {
 refYear <- sapply(references$Reference, getYear)
 
 # Create data frame of nodes from references
-citationNodes <- data.frame(Id = references$Reference, 
+citationNodes <- data.frame(Id = references$Reference,
                             Year = refYear)
 
 citationNodes$Origin <- rep("reference", nrow(citationNodes))
 
 # Create data frame of nodes from literature records
-literatureNodes <- data.frame(Id = literature$ReferenceString, 
+literatureNodes <- data.frame(Id = literature$ReferenceString,
                               Year = literature$Year)
 literatureNodes$Origin <- rep("literature", nrow(literatureNodes))
 
@@ -196,22 +211,21 @@ citationNodes$Label <- citationNodes$Id
 
 
 # Save node table
-write.table(citationNodes, "output/citation_nodes.csv", 
+write.table(citationNodes, "output/citation_nodes.csv",
             sep = ';', row.names = F)
 
 ###############################################################################
 # Create citations edge table
 
 # Create table
-citationEdges <- data.frame(Source = references$ReferenceString, 
-                            Target = references$Reference, 
-                            id = references$id, 
-                            Year = references$Year, 
+citationEdges <- data.frame(Source = references$ReferenceString,
+                            Target = references$Reference,
+                            id = references$id,
+                            Year = references$Year,
                             Title = references$Title)
 citationEdges$Source <- as.character(citationEdges$Source)
 citationEdges$Target <- as.character(citationEdges$Target)
 
 # Save citaion edge table
-write.table(citationEdges, "output/citation_edges.csv", 
+write.table(citationEdges, "output/citation_edges.csv",
             sep = ';', row.names = F)
-
