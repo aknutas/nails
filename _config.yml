@@ -1,0 +1,8 @@
+title: nails project
+description: Network Analysis Interface for Literature Studies
+google_analytics: UA-61880893-1
+show_downloads: true
+theme: jekyll-theme-slate
+
+gems:
+  - jekyll-mentions
