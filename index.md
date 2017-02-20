@@ -14,7 +14,7 @@ The basic design and bibliometric principles of the system have been published i
 
 Antti Knutas, Arash Hajikhani, Juho Salminen, Jouni Ikonen, and Jari Porras. 2015. _Cloud-Based Bibliometric Analysis Service for Systematic Mapping Studies_. In Proceedings of the 16th International Conference on Computer Systems and Technologies (CompSysTech '15). DOI: 10.1145/2812428.2812442
 
-A preprint version of the article is [available for download](http://www.codecamp.fi/lib/exe/fetch.php/wiki/nails-compsystech2015-preprint.pdf) as PDF. The official version is now available at the [ACM Digital Library](http://dl.acm.org/citation.cfm?doid=2812428.2812442).
+A preprint version of the article is [available for download](http://www.codecamp.fi/lib/exe/fetch.php/wiki/nails-compsystech2015-preprint.pdf) as PDF. The official version is now available at the [ACM Digital Library](http://dl.acm.org/citation.cfm?doid=2812428.2812442). If you use the software in your scientific work, please consider citing us.
 
 Our tool has been used in the following publications:
 * Kolle, S. R., Shankarappa, T. H., Manjunatha Reddy, T. B., & Muniyappa, A. (2015). [Scholarly Communication in the International Journal of Pest Management: A Bibliometric Analysis from 2005 to 2014](http://www.tandfonline.com/doi/abs/10.1080/10496505.2015.1087854). Journal of Agricultural & Food Information, 16(4), 301-314.
@@ -32,7 +32,7 @@ These scripts can be used to complete an exploratory literature review using dat
 
 You can download, install and use our scripts directly. See steps below.
 
-1. Go to Web of Knowledge [website](http://webofknowledge.com/) and select the Web of Science Core Collection from the dropdown menu. 
+1. Go to Web of Knowledge [website](http://webofknowledge.com/) and select the Web of Science Core Collection from the dropdown menu.
 2. Search for literature.
 3. Download data. Select Save to Other File Formats from the dropdown menu, enter the range of records (max 500 records for one download), and download Full Record and Cited References. File format should be Tab-delimited (Win) or Tab-delimited (Mac). If you need more than 500 records, repeat the download.
 4. Put the downloaded files into the input folder.
@@ -44,7 +44,7 @@ See detailed instructions instructions with screenshots for manual processing st
 
 _Alternatively_ you can upload files to [our online analysis server](http://hammer.nailsproject.net/). The service is in early beta testing so we appreciate reporting of issues to the [project issues page](https://github.com/aknutas/nails/issues) or as a private Twitter message to [@aknutas](https://twitter.com/aknutas). You can follow the steps below or view a brief [video tutorial](https://youtu.be/I1bRXQs_zMk?list=PLJiFJenPKrLOpdu7E1gEhVEAWF7CLQs_2) on how to get started.
 
-1. Go to Web of Knowledge [website](http://webofknowledge.com/) and select the Web of Science Core Collection from the dropdown menu. 
+1. Go to Web of Knowledge [website](http://webofknowledge.com/) and select the Web of Science Core Collection from the dropdown menu.
 2. Search for literature.
 3. Download data. Select Save to Other File Formats from the dropdown menu, enter the range of records (max 500 records for one download), and download Full Record and Cited References. File format should be Tab-delimited (Win) or Tab-delimited (Mac). If you need more than 500 records, repeat the download.
 4. Compress the resulting files into a single ZIP archive and upload them to the online analysis server at [hammer.nailsproject.net](http://hammer.nailsproject.net/).
