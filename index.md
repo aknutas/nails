@@ -50,4 +50,10 @@ _Alternatively_ you can upload files to [our online analysis server](http://hamm
 4. Compress the resulting files into a single ZIP archive and upload them to the online analysis server at [hammer.nailsproject.net](http://hammer.nailsproject.net/).
 5. Download the results from the web page after the server has processed through the queue.
 
-The script also creates node and edge tables for author and citation networks that can be loaded to Gephi for further exploration.  
+The script also creates node and edge tables for author and citation networks that can be loaded to Gephi for further exploration.
+
+## We are open source and free software
+
+This program is [free software](https://www.gnu.org/philosophy/free-sw.html): you can redistribute it and/or modify it under the terms of the [GNU General Public License](https://www.gnu.org/licenses/quick-guide-gplv3.html) as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See LICENSE file for more information.
+
+What does it mean? We are free as in freedom. You may run the software as you wish, for any purpose; you are free to study how the program works, and change it as you wish; you are free to redistribute copies; and you are free to distribute copies of modified versions to others. You may not distribute this software in a non-free manner or add additional restrictions. The only limitations are that you have to follow the free software license, retain the original copyright notices and acknowledgement texts in the program output (section 7b). See links above for more information. If you edit and improve the software, we would love to hear back from you.
