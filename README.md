@@ -13,11 +13,21 @@ SNA is an interesting way for researchers to map large datasets and get insights
 
 The project files are available as open source here in our [Github repository](https://github.com/aknutas/nails). If you link or refer to us, please link to our [project page](http://aknutas.github.io/nails/).
 
+Science!
+----
+The basic design and bibliometric principles of the system have been published in a research article:
+
+Antti Knutas, Arash Hajikhani, Juho Salminen, Jouni Ikonen, and Jari Porras. 2015. _Cloud-Based Bibliometric Analysis Service for Systematic Mapping Studies_. In Proceedings of the 16th International Conference on Computer Systems and Technologies (CompSysTech '15). DOI: 10.1145/2812428.2812442
+
+A preprint version of the article is [available for download](http://www.codecamp.fi/lib/exe/fetch.php/wiki/nails-compsystech2015-preprint.pdf) as PDF. The official version is now available at the [ACM Digital Library](http://dl.acm.org/citation.cfm?doid=2812428.2812442).
+
+If you use the software in your scientific work, please consider citing us.
+
 How to Use
 ----
 
 These scripts can be used to complete an exploratory literature review
-using data downloaded from Web of Knowledge.
+using data downloaded from Web of Knowledge. You can follow the steps below or view a brief [video tutorial](https://youtu.be/I1bRXQs_zMk?list=PLJiFJenPKrLOpdu7E1gEhVEAWF7CLQs_2) on how to get started.
 
 1. Go to Web of Knowledge website and select Web of Science Core Collection
 from the dropdown menu.
@@ -35,7 +45,7 @@ create visualizations. The results are saved as a HTML-file exploration.html.
 The script also creates node and edge tables for author and citation
 networks that can be loaded to Gephi for further exploration.  
 
-See further instructions for manual usage at https://sites.google.com/site/bibliometricdatavisualization/instructions
+See further instructions for manual usage at https://sites.google.com/site/bibliometricdatavisualization/instructions or follow the [video tutorial](https://youtu.be/I1bRXQs_zMk?list=PLJiFJenPKrLOpdu7E1gEhVEAWF7CLQs_2).
 
 Requirements
 ----
