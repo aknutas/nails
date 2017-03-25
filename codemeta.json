@@ -1,0 +1,36 @@
+{
+  "@context": "https://raw.githubusercontent.com/mbjones/codemeta/master/codemeta.jsonld",
+  "@type": "Code",
+  "author": [
+    {
+      "@id": "http://orcid.org/0000-0003-0688-2211",
+      "@type": "Person",
+      "email": "juho.salminen@gmail.com",
+      "name": "Juho Salminen",
+      "affiliation": ""
+    },
+    {
+      "@id": "http://orcid.org/0000-0002-6953-0021",
+      "@type": "Person",
+      "email": "antti.knutas@lut.fi",
+      "name": "Antti Knutas",
+      "affiliation": "Lappeenranta University of Technology"
+    },
+    {
+      "@type": "Person",
+      "email": "arash.hajikhani@lut.fi",
+      "name": "Arash Hajikhani",
+      "affiliation": "Lappeenranta University of Technology"
+    }
+  ],
+  "identifier": "",
+  "codeRepository": "https://github.com/aknutas/nails",
+  "datePublished": "2017-03-25",
+  "dateModified": "2017-03-25",
+  "dateCreated": "2017-03-25",
+  "description": "nails performs Social Network Analysis (SNA) on citation data.",
+  "keywords": "systematic mapping study, literature review, bibliometric analysis, citation analysis, social network analysis, R",
+  "license": "GPL v3.0",
+  "title": "Network Analysis Interface for Literature Studies",
+  "version": "v1.0.0"
+}
