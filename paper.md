@@ -13,7 +13,7 @@ authors:
  - name: Antti Knutas
    orcid: 0000-0002-6953-0021
    affiliation: 1
- - name: Arash hajikhani
+ - name: Arash Hajikhani
    affiliation: 1
 affiliations:
  - name: Lappeenranta University of Technology
