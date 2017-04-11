@@ -39,7 +39,7 @@ Search for literature. If you do not have access, check if any of your local uni
 7. Open exploration.Rmd with RStudio and press Knit HTML -button. The script will combine the downloaded data into a single file, process it and create visualizations. The results are saved as a HTML-file exploration.html.
 8. See detailed instructions instructions with screenshots for manual processing steps and installation at https://sites.google.com/site/bibliometricdatavisualization/instructions
 
-For command line Linux usage the script "exploration" is provided in the repository root. For that knitr[] and related packages are required. However, RStudio or visual operation is not required.
+For command line Linux usage the script "startnails.sh" is provided in the repository root that first executes analysis script and then the render script. For that knitr[13], markdown[14] and related packages are required. However, RStudio or visual operation is not required.
 
 Alternatively you can upload files to our online analysis server. The service is in early beta testing so we appreciate reporting of issues to the project issues page or as a private Twitter message to [@aknutas](https://twitter.com/aknutas). You can view a brief [video tutorial](https://youtu.be/I1bRXQs_zMk?list=PLJiFJenPKrLOpdu7E1gEhVEAWF7CLQs_2) on how to get started.
 
@@ -56,3 +56,5 @@ Alternatively you can upload files to our online analysis server. The service is
 [10] Jonathan Chang (2015). lda: Collapsed Gibbs Sampling Methods for Topic Models. R package version 1.4.2. https://CRAN.R-project.org/package=lda
 [11] Carson Sievert and Kenny Shirley (2015). LDAvis: Interactive Visualization of Topic Models. R package version 0.3.2. https://CRAN.R-project.org/package=LDAvis
 [12] Csardi G, Nepusz T: The igraph software package for complex network research, InterJournal, Complex Systems 1695. 2006. http://igraph.org
+[13] Yihui Xie (2016). knitr: A General-Purpose Package for Dynamic Report Generation in R. R package version 1.15.1.
+[14] JJ Allaire, Jeffrey Horner, Vicent Marti and Natacha Porte (2015). markdown: 'Markdown' Rendering for R. R package version 0.7.7. https://CRAN.R-project.org/package=markdown
