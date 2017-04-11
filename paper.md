@@ -53,6 +53,7 @@ Alternatively you can upload files to our online analysis server. The service is
 [4] Ananda Mahto (2014). splitstackshape: Stack and Reshape Datasets After Splitting Concatenated Values. R package version 1.4.2. https://CRAN.R-project.org/package=splitstackshape
 
 [5] H. Wickham. Reshaping data with the reshape package. Journal of Statistical Software, 21(12), 2007.
+
 [6] Hadley Wickham (2011). The Split-Apply-Combine Strategy for Data Analysis. Journal of Statistical Software, 40(1), 1-29. URL http://www.jstatsoft.org/v40/i01/.
 
 [7] Hadley Wickham (2017). stringr: Simple, Consistent Wrappers for Common String Operations. R package version 1.2.0. https://CRAN.R-project.org/package=stringr
@@ -62,6 +63,7 @@ Alternatively you can upload files to our online analysis server. The service is
 [9] Milan Bouchet-Valat (2014). SnowballC: Snowball stemmers based on the C libstemmer UTF-8 library. R package version 0.5.1. https://CRAN.R-project.org/package=SnowballC
 
 [10] Jonathan Chang (2015). lda: Collapsed Gibbs Sampling Methods for Topic Models. R package version 1.4.2. https://CRAN.R-project.org/package=lda
+
 [11] Carson Sievert and Kenny Shirley (2015). LDAvis: Interactive Visualization of Topic Models. R package version 0.3.2. https://CRAN.R-project.org/package=LDAvis
 
 [12] Csardi G, Nepusz T: The igraph software package for complex network research, InterJournal, Complex Systems 1695. 2006. http://igraph.org
