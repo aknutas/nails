@@ -44,7 +44,7 @@ enableTM <- TRUE
 for (file in filelist) {
     if (!exists("literature")) {
         # Skip input processing if placeholder file
-        if(grepl('.keep', file)) {
+        if(grepl('.keep', file) || grepl('.zip', file)) {
           next
         }
         literature <- read.delim2(file, header = T,
