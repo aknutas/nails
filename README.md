@@ -13,6 +13,8 @@ SNA is an interesting way for researchers to map large datasets and get insights
 
 The project files are available as open source here in our [Github repository](https://github.com/aknutas/nails). If you link or refer to us, please link to our [project page](http://aknutas.github.io/nails/).
 
+There is an alternative, R package version for use by R programmers in the [R package version repository](http://aknutas.github.io/nails-package/).
+
 Science!
 ----
 The basic design and bibliometric principles of the system have been published in a research article:
