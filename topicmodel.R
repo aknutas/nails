@@ -61,15 +61,16 @@ get.terms <- function(x) {
   index <- index[!is.na(index)]
   rbind(as.integer(index - 1), as.integer(rep(1, length(index))))
 }
-# mclapply is the multicore enabled version of lapply
+
+# mclapply is the multicore enabled version of lapply; change lapply to mclapply for speedup (and uncomment the library at the top)
 documents <- lapply(doc.list, get.terms)
 
-# Compute some statistics related to the data set:
-D <- length(documents)  # number of documents (2,000)
-W <- length(vocab)  # number of terms in the vocab (14,568)
-doc.length <- sapply(documents, function(x) sum(x[2, ]))  # number of tokens per document [312, 288, 170, 436, 291, ...]
-N <- sum(doc.length)  # total number of tokens in the data (546,827)
-term.frequency <- as.integer(term.table)  # frequencies of terms in the corpus [8939, 5544, 2411, 2410, 2143, ...]
+# Compute some statistics related to the data set
+D <- length(documents)  # number of documents
+W <- length(vocab)  # number of terms in the vocab
+doc.length <- sapply(documents, function(x) sum(x[2, ]))  # number of tokens per document
+N <- sum(doc.length)  # total number of tokens in the data
+term.frequency <- as.integer(term.table)  # frequencies of terms in the corpus
 
 # MCMC and model tuning parameters
 K <- 6 # number of topics
@@ -106,7 +107,6 @@ TopicModel    <- list(phi = phi,
                       doc.length = doc.length,
                       vocab = vocab,
                       term.frequency = term.frequency)
-
 
 # create the JSON object to feed the visualization
 json <- createJSON(phi = TopicModel$phi,
