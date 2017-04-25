@@ -34,7 +34,7 @@ data <- literature$Abstract
 # read in English stopwords from the SMART collection
 stop_words <- stopwords("SMART")
 
-# pre-processing (remove stopwords; destem)
+# pre-processing (remove stopwords; stem)
 data <- gsub("'", "", data)  # remove apostrophes
 data <- gsub("[[:punct:]]", " ", data)  # replace punctuation with space
 data <- gsub("[[:cntrl:]]", " ", data)  # replace control characters with space

@@ -246,6 +246,10 @@ if (enableTM) {
   # Save the topic model topic descriptions
   write.table(topwords, "output/topicmodeltopics.csv",
               sep = ";", row.names = F, qmethod = "double")
+  
+  #Write out per document topic probabilities
+  write.table(tfdDF, "output/documenttopicprobabilities.csv",
+              sep = ';', quote = F, row.names = F)
 
   # HTML output
   serVis(json, out.dir = 'output/topicmodelvis', open.browser = FALSE)
