@@ -47,22 +47,23 @@ for (file in filelist) {
         if(grepl('.keep', file) || grepl('.zip', file)) {
           next
         }
-        literature <- read.delim2(file, header = T,
+        literature <- read.delim2(file, header = FALSE,
                                   fileEncoding = "UTF-16", row.names = NULL,
-                                  quote = "")
-        # Fix misplaced column names
-        data.names <- names(literature)[2:length(names(literature))]
-        literature <- literature[, 1:(ncol(literature) - 1)]
-        names(literature) <- data.names
+                                  quote = "", stringsAsFactors = FALSE)
+        colindex <- !is.na(literature[1, ])
+        data_names <- as.character(literature[1, colindex])
+        literature <- literature[-1, colindex]
+        names(literature) <- data_names
     }
     else {
-        literature2 <- read.delim2(file, header = T,
+        literature2 <- read.delim2(file, header = FALSE,
                                    fileEncoding = "UTF-16", row.names = NULL,
-                                   quote = "")
+                                   quote = "", stringsAsFactors = FALSE)
         # Fix misplaced column names
-        data.names <- names(literature2)[2:length(names(literature2))]
-        literature2 <- literature2[, 1:(ncol(literature2) - 1)]
-        names(literature2) <- data.names
+        colindex <- !is.na(literature2[1, ])
+        data_names <- as.character(literature2[1, colindex])
+        literature2 <- literature2[-1, colindex]
+        names(literature2) <- data_names
         # Merge data
         literature <- rbind(literature, literature2)
     }
@@ -246,7 +247,7 @@ if (enableTM) {
   # Save the topic model topic descriptions
   write.table(topwords, "output/topicmodeltopics.csv",
               sep = ";", row.names = F, qmethod = "double")
-  
+
   #Write out per document topic probabilities
   write.table(tfdDF, "output/documenttopicprobabilities.csv",
               sep = ';', quote = F, row.names = F)
