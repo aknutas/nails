@@ -53,6 +53,8 @@ term.table <- sort(term.table, decreasing = TRUE)
 # remove terms that are stop words or occur fewer than 5 times
 del <- names(term.table) %in% stop_words | term.table < 5
 term.table <- term.table[!del]
+del2 <- grepl("^\\d+$", names(term.table)) # remove words that are only numbers
+term.table <- term.table[!del2]
 vocab <- names(term.table)
 
 # now put the documents into the format required by the lda package
@@ -101,6 +103,9 @@ topwords <- top.topic.words(fit$topics, 10, by.score = TRUE)
 
 theta <- t(apply(fit$document_sums + alpha, 2, function(x) x/sum(x)))
 phi <- t(apply(t(fit$topics) + eta, 2, function(x) x/sum(x)))
+
+# Document topic theta probabilities for export
+thetadf <- data.frame(theta)
 
 TopicModel    <- list(phi = phi,
                       theta = theta,

@@ -248,8 +248,8 @@ if (enableTM) {
   write.table(topwords, "output/topicmodeltopics.csv",
               sep = ";", row.names = F, qmethod = "double")
 
-  #Write out per document topic probabilities
-  write.table(tfdDF, "output/documenttopicprobabilities.csv",
+  #Write out per document topic probabilities (theta values)
+  write.table(thetadf, "output/documenttopicprobabilities.csv",
               sep = ';', quote = F, row.names = F)
 
   # HTML output
