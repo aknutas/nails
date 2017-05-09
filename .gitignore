@@ -11,3 +11,7 @@
 .Rproj.user/
 .Rproj.user
 *.Rproj
+
+input/savedrecs.txt
+
+exploration.html
