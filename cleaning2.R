@@ -240,23 +240,39 @@ literature <- literature[!duplicated(literature[, "ReferenceString"]), ]
 if (enableTM) {
   # Do topic modeling on abstracts using the lda libraries (adding them as a new column)
   source("topicmodel.R", chdir = T)
-
-  # Add top topic to main document
-  literature$TopicModelTopic <- tfdDF$toptopic
-
-  # Save the topic model topic descriptions
-  write.table(topwords, "output/topicmodeltopics.csv",
+  
+  
+  # Add top topics back to the main document and rename toptopic column
+  thetaDFtops <- thetaDF[,c("toptopic", "rowids")]
+  literature <- merge(x = literature, y = thetaDFtops, by="rowids", all.x = TRUE)
+  names(literature)[names(literature) == "toptopic"] <- "TopicModelTopic"
+  
+  # Memory cleanup
+  rm(thetaDFtops)
+  
+  # Output files
+  # Write out topic model topic descriptions
+  write.table(topickeywords, "output/topicmodeltopics.csv", 
               sep = ";", row.names = F, qmethod = "double")
-
-  #Write out per document topic probabilities (theta values)
-  write.table(thetadf, "output/documenttopicprobabilities.csv",
-              sep = ';', quote = F, row.names = F)
-
-  # HTML output
-  serVis(json, out.dir = 'output/topicmodelvis', open.browser = FALSE)
+  
+  # Write out theta probability distributions for each document
+  write.table(thetaDF, "output/documenttopicthetaprobabilities.csv",
+              sep = ';', row.names = F, quote = F)
+  
+  # Writing out the table of K quality values
+  write.csv2(semcohsK, file= "output/kqualityvalues.csv", row.names=FALSE)
+  
+  # Create LDAvis JSON
+  jsonlda <- topicmodels_json_ldavis(fit, abstractCorpus, abstractDTM)
+  # LDAvis HTML output
+  serVis(jsonlda, out.dir = 'output/topicmodelvis', open.browser = FALSE)
 
   # Freeing up memory
-  rm(json)
+  rm(fit)
+  rm(thetaDF)
+  rm(abstractCorpus)
+  rm(abstractDTM)
+  rm(jsonlda)
 }
 
 ###############################################################################

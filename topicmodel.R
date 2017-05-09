@@ -16,113 +16,139 @@
 
 ###############################################################################
 
-# Do topic modeling on abstracts using the lda libraries
+# Estimates number of topics (K) using the stm library
+# Does LDA topic modeling on topics and abstracts using the topicmodels libraries
 # Do not use alone (loaded from the cleaning2.R)
 
 # Libraries
+library(stm)
 library(tm)
-library(SnowballC)
-library(lda)
 library(LDAvis)
-# Enable multicore processing (works only on *NIX-based systems)
-#library(doMC)
-#registerDoMC(4)
+library(igraph)
+library(topicmodels)
+library(dplyr)
+library(stringi)
 
-# Import data (see cleaning2.R)
-data <- literature$Abstract
+# Insert rowids for output merging
+literature$rowids <-as.numeric(rownames(literature))
 
-# read in English stopwords from the SMART collection
-stop_words <- stopwords("SMART")
+# Subselect dataframe for processing and drop empty rows
+doctablewt <- literature[,c("DocumentTitle", "Abstract", "rowids")]
+doctablewt <- doctablewt[!is.na(doctablewt$Abstract), ]
+doctablewt <- doctablewt[!is.na(doctablewt$DocumentTitle), ]
 
-# pre-processing (remove stopwords; stem)
-data <- gsub("'", "", data)  # remove apostrophes
-data <- gsub("[[:punct:]]", " ", data)  # replace punctuation with space
-data <- gsub("[[:cntrl:]]", " ", data)  # replace control characters with space
-data <- gsub("^[[:space:]]+", "", data) # remove whitespace at beginning of documents
-data <- gsub("[[:space:]]+$", "", data) # remove whitespace at end of documents
-data <- tolower(data)  # force to lowercase
-data <- stemDocument(data)
+# Extract and combine topics, abstracts
+data <- paste(doctablewt$DocumentTitle, doctablewt$Abstract, sep = " ")
 
-# tokenize on space and output as a list
-doc.list <- strsplit(data, "[[:space:]]+")
+# Prepare documents
+processed <- textProcessor(data, stem = TRUE)
+out <- prepDocuments(processed$documents, processed$vocab)
 
-# compute the table of terms
-term.table <- table(unlist(doc.list))
-term.table <- sort(term.table, decreasing = TRUE)
+# Estimate number of topics; semantic coherence often good (default method spectral; best compromise and deterministic)
+topickest <- searchK(out$documents, out$vocab, K = c(4:6))
+semcohsK <- data.frame(topickest$results$K, topickest$results$semcoh)
+colnames(semcohsK)<- c("K","semcohs")
 
-# remove terms that are stop words or occur fewer than 5 times
-del <- names(term.table) %in% stop_words | term.table < 5
-term.table <- term.table[!del]
-del2 <- grepl("^\\d+$", names(term.table)) # remove words that are only numbers
-term.table <- term.table[!del2]
-vocab <- names(term.table)
+# Getting the K with highest semantic coherence, setting it as true
+bestpick <- semcohsK[which.max(semcohsK$semcohs),]
+bestK <- as.integer(bestpick$K)
+semcohsK$bestpick <- FALSE
+semcohsK$bestpick[which.max(semcohsK$semcohs)] <- TRUE
 
-# now put the documents into the format required by the lda package
-get.terms <- function(x) {
-  index <- match(x, vocab)
-  index <- index[!is.na(index)]
-  rbind(as.integer(index - 1), as.integer(rep(1, length(index))))
+# Cleanup memory
+rm(processed)
+rm(out)
+
+# Function for converting topicmodels to LDAvis compatible
+# Source: https://gist.github.com/a-paxton/a1609f5f772b642027d4
+#' Convert the output of a topicmodels Latent Dirichlet Allocation to JSON
+#' for use with LDAvis
+#'
+#' @param fitted Output from a topicmodels \code{LDA} model.
+#' @param corpus Corpus object used to create the document term
+#' matrix for the \code{LDA} model. This should have been create with
+#' the tm package's \code{Corpus} function.
+#' @param doc_term The document term matrix used in the \code{LDA}
+#' model. This should have been created with the tm package's 
+#' \code{DocumentTermMatrix} function.
+#'
+#' @seealso \link{LDAvis}.
+#' @export
+
+topicmodels_json_ldavis <- function(fitted, corpus, doc_term){
+  
+  # Find required quantities
+  phi <- posterior(fitted)$terms %>% as.matrix
+  theta <- posterior(fitted)$topics %>% as.matrix
+  vocab <- colnames(phi)
+  doc_length <- vector()
+  for (i in 1:length(corpus)) {
+    temp <- paste(corpus[[i]]$content, collapse = ' ')
+    doc_length <- c(doc_length, stri_count(temp, regex = '\\S+'))
+  }
+  temp_frequency <- as.data.frame(as.matrix(doc_term)) # elegant, silenced solution from http://stackoverflow.com/a/18749888/5514568
+  freq_matrix <- data.frame(ST = colnames(temp_frequency),
+                            Freq = colSums(temp_frequency))
+  rm(temp_frequency)
+  
+  # Convert to json
+  json_lda <- LDAvis::createJSON(phi = phi, theta = theta,
+                                 vocab = vocab,
+                                 doc.length = doc_length,
+                                 term.frequency = freq_matrix$Freq)
+  
+  return(json_lda)
 }
 
-# mclapply is the multicore enabled version of lapply; change lapply to mclapply for speedup (and uncomment the library at the top)
-documents <- lapply(doc.list, get.terms)
+# Create corpus
+abstractCorpus <- Corpus(VectorSource(data))
 
-# Compute some statistics related to the data set
-D <- length(documents)  # number of documents
-W <- length(vocab)  # number of terms in the vocab
-doc.length <- sapply(documents, function(x) sum(x[2, ]))  # number of tokens per document
-N <- sum(doc.length)  # total number of tokens in the data
-term.frequency <- as.integer(term.table)  # frequencies of terms in the corpus
+# Clean up with tm package
+abstractDTM <- tm::DocumentTermMatrix(abstractCorpus, control = list(stemming = TRUE, stopwords = TRUE,
+                                                                     minWordLength = 2, removeNumbers = TRUE, removePunctuation = TRUE))
 
-# MCMC and model tuning parameters
-K <- 6 # number of topics
-G <- 2500 # iterations
-alpha <- 0.166 # 1 / K
-eta <- 0.166 # 1 / K
+# Cut documents with no words after filtering
+rowTotals <- apply(abstractDTM , 1, sum)
+# If empty rows, then remove documents from corpus and document-term matrix
+empty.rows <- abstractDTM[rowTotals == 0, ]$dimnames[1][[1]]
+if(!is.null(empty.rows)){
+  abstractCorpus <- abstractCorpus[-as.numeric(empty.rows)]
+  doctablewt <- doctablewt[-as.numeric(empty.rows),]
+  # Disabled for now, not sure how well the shortcut works (TODO: Testing)
+  # abstractDTM <- abstractDTM[rowTotals> 0, ] 
+  # A two-pass cludge, possibly could be replaced by row abstractDTM <- abstractDTM[rowTotals> 0, ]
+  # Enabling a second pass to prevent a discrepancy between corpus, doclist and DTM
+  abstractDTM <- tm::DocumentTermMatrix(abstractCorpus, control = list(stemming = TRUE, stopwords = TRUE,
+                                                                       minWordLength = 2, removeNumbers = TRUE, removePunctuation = TRUE))
+}
 
-# Fit the model
-set.seed(357)
+# Parameters
+# Note: alpha and beta values estimated automatically
+K <- bestK
+burnin <- 4000
+iter <- 2000 # default value
+thin <- 500
+seed <- 5707363 # random seed
+nstart <- 1 # random starts for model evaluation, best is picked (increase from 1 to 4-6 for final analysis)
+best <- TRUE
 
-fit <- lda.collapsed.gibbs.sampler(documents = documents, K = K, vocab = vocab,
-                                   num.iterations = G, alpha = alpha,
-                                   eta = eta, initial = NULL, burnin = 0,
-                                   compute.log.likelihood = TRUE)
+# Latent Dirichlet Allocation
+fit <- LDA(abstractDTM, K, method="Gibbs", control=list(nstart=nstart,
+                                                        seed=seed, best=best, 
+                                                        burnin=burnin, iter=iter,
+                                                        thin=thin))
 
-# Document topic matrix (transposed to get topic probabilities for each document)
-topicsfordocs <- t(fit$document_sums)
-# Convert to data frame
-tfdDF <- data.frame(topicsfordocs)
-# Add top topics document
-tfdDF$toptopic <- colnames(tfdDF)[max.col(tfdDF,ties.method="first")]
+# Terms for each topic
+topickeywords <- terms(fit, 10)
 
-# Summary statistics
-# Most likely documents for each topic
-topdocsfortopic <- top.topic.documents(fit$document_sums)
-# Ten most likely words for each topic
-topwords <- top.topic.words(fit$topics, 10, by.score = TRUE)
+# Theta topic probabilities for each document
+thetaDF <- as.data.frame(posterior(fit)$topics)
+# Add top topics for each document, add rowids for future reference
+thetaDF$toptopic <- colnames(thetaDF)[max.col(thetaDF,ties.method="first")]
+thetaDF$rowids <- doctablewt$rowids
 
-theta <- t(apply(fit$document_sums + alpha, 2, function(x) x/sum(x)))
-phi <- t(apply(t(fit$topics) + eta, 2, function(x) x/sum(x)))
-
-# Document topic theta probabilities for export
-thetadf <- data.frame(theta)
-
-TopicModel    <- list(phi = phi,
-                      theta = theta,
-                      doc.length = doc.length,
-                      vocab = vocab,
-                      term.frequency = term.frequency)
-
-# create the JSON object to feed the visualization
-json <- createJSON(phi = TopicModel$phi,
-                   theta = TopicModel$theta,
-                   doc.length = TopicModel$doc.length,
-                   vocab = TopicModel$vocab,
-                   term.frequency = TopicModel$term.frequency)
-
-# Freeing up memory
+# Memory cleanup
 rm(data)
-rm(documents)
-rm(vocab)
-rm(TopicModel)
-rm(fit)
+rm(rowTotals)
+rm(empty.rows)
+rm(doctablewt)
