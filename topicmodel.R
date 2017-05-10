@@ -40,12 +40,16 @@ doctablewt <- doctablewt[!is.na(doctablewt$DocumentTitle), ]
 # Extract and combine topics, abstracts
 data <- paste(doctablewt$DocumentTitle, doctablewt$Abstract, sep = " ")
 
-# Prepare documents
+# Prepare documents into corpus
+# Also processes the following by default:
+# Lowercases, removes SMART stopwords, removes numbers, removes punctuation, wordlength min is 3
 processed <- textProcessor(data, stem = TRUE)
 out <- prepDocuments(processed$documents, processed$vocab)
 
 # Estimate number of topics; semantic coherence often good (default method spectral; best compromise and deterministic)
-topickest <- searchK(out$documents, out$vocab, K = c(4:6))
+# Seed set for consitent results
+set.seed(5707363)
+topickest <- searchK(out$documents, out$vocab, K = c(4:6), seed = 5707363)
 semcohsK <- data.frame(topickest$results$K, topickest$results$semcoh)
 colnames(semcohsK)<- c("K","semcohs")
 
@@ -103,9 +107,16 @@ topicmodels_json_ldavis <- function(fitted, corpus, doc_term){
 # Create corpus
 abstractCorpus <- Corpus(VectorSource(data))
 
-# Clean up with tm package
-abstractDTM <- tm::DocumentTermMatrix(abstractCorpus, control = list(stemming = TRUE, stopwords = TRUE,
-                                                                     minWordLength = 2, removeNumbers = TRUE, removePunctuation = TRUE))
+# Preprocess by lowercasing, removing punctuation, numbers, whitespace and stopwords, and finally stemming
+abstractCorpus <- tm_map(abstractCorpus, content_transformer(tolower))
+abstractCorpus <- tm_map(abstractCorpus, removePunctuation)
+abstractCorpus <- tm_map(abstractCorpus, removeNumbers)
+abstractCorpus <- tm_map(abstractCorpus, stripWhitespace)
+abstractCorpus <- tm_map(abstractCorpus, removeWords, stopwords("SMART"))
+abstractCorpus <- tm_map(abstractCorpus, stemDocument)
+
+# Create DTM, minwordlength 3 (like above in stm)
+abstractDTM <- tm::DocumentTermMatrix(abstractCorpus, control = list(minWordLength = 3))
 
 # Cut documents with no words after filtering
 rowTotals <- apply(abstractDTM , 1, sum)
@@ -118,8 +129,7 @@ if(!is.null(empty.rows)){
   # abstractDTM <- abstractDTM[rowTotals> 0, ] 
   # A two-pass cludge, possibly could be replaced by row abstractDTM <- abstractDTM[rowTotals> 0, ]
   # Enabling a second pass to prevent a discrepancy between corpus, doclist and DTM
-  abstractDTM <- tm::DocumentTermMatrix(abstractCorpus, control = list(stemming = TRUE, stopwords = TRUE,
-                                                                       minWordLength = 2, removeNumbers = TRUE, removePunctuation = TRUE))
+  abstractDTM <- tm::DocumentTermMatrix(abstractCorpus, control = list(minWordLength = 3))
 }
 
 # Parameters
