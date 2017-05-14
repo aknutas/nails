@@ -1,5 +1,5 @@
 **Network Analysis Interface for Literature Studies**  
-by _[Juho Salminen](https://twitter.com/Juho_Salminen), [Arash Hajikhani](https://twitter.com/arash_hajikhani) and [Antti Knutas](https://twitter.com/aknutas)_  
+by _[Juho Salminen](https://twitter.com/Juho_Salminen), [Antti Knutas](https://twitter.com/aknutas) and [Arash Hajikhani](https://twitter.com/arash_hajikhani)_  
 at _Lappeenranta University of Technology_
 
 ## What Is It?
@@ -16,10 +16,15 @@ Antti Knutas, Arash Hajikhani, Juho Salminen, Jouni Ikonen, and Jari Porras. 201
 
 A preprint version of the article is [available for download](http://www.codecamp.fi/lib/exe/fetch.php/wiki/nails-compsystech2015-preprint.pdf) as PDF. The official version is now available at the [ACM Digital Library](http://dl.acm.org/citation.cfm?doid=2812428.2812442). If you use the software in your scientific work, please consider citing us.
 
-Our tool has been used in the following publications:
+Some publications that have used our analysis tool:
 * Kolle, S. R., Shankarappa, T. H., Manjunatha Reddy, T. B., & Muniyappa, A. (2015). [Scholarly Communication in the International Journal of Pest Management: A Bibliometric Analysis from 2005 to 2014](http://www.tandfonline.com/doi/abs/10.1080/10496505.2015.1087854). Journal of Agricultural & Food Information, 16(4), 301-314.
 * Salminen, J. (2015). [The role of collective intelligence in crowdsourcing innovation](http://urn.fi/URN:ISBN:978-952-265-876-0). Acta Universitatis Lappeenrantaensis.
+* Geissdoerfer, M., Savaget, P., Bocken, N. M., & Hultink, E. J. (2016). The Circular Economy–A new sustainability paradigm?. Journal of Cleaner Production.
 * Kolle, S. R. (2016). [Global research on air pollution between 2005 and 2014: A bibliometric study.](http://www.emeraldinsight.com/doi/full/10.1108/CB-05-2016-0008) Collection Building, 35(3).
+* Knutas, A. (2016). Increasing Beneficial Interactions in a Computer-Supported Collaborative Environment. Acta Universitatis Lappeenrantaensis.
+* Andres, H., & Lander, G. C. (2016). [What’s the Key to Unlocking the Proteasome’s Gate?](http://www.cell.com/structure/abstract/S0969-2126(16)30353-7). Structure, 24(12), 2037-2038.
+* Castro, V. F. D., Castro, V. F. D., Frazzon, E. M., & Frazzon, E. M. (2017). Benchmarking of best practices: an overview of the academic literature. Benchmarking: An International Journal, 24(3), 750-774.
+* Hajikhani, A. (2017). [Emergence and dissemination of ecosystem concept in innovation studies: A systematic literature review study](https://scholarspace.manoa.hawaii.edu/handle/10125/41796). In Proceedings of the 50th Hawaii International Conference on System Sciences.
 
 ### Systematic Mapping Studies
 A [systematic mapping study](http://ewic.bcs.org/content/ConWebDoc/19543) (SMS) is a secondary study that aims at classification and thematic analysis of earlier research. The SMS is more general in search terms and aims at classifying and structuring the field of research, while the target of systematic literature review is to summarise and evaluate the research results. According to [Kitchenham and Charters](http://www.elsevier.com/__data/promis_misc/525444systematicreviewsguide.pdf) performing a SMS can be especially suitable if few literature reviews have been done on the topic and there is a need to get a general overview of the field of interest. Both kinds of studies can be used to identify research gaps in the current state of research.
