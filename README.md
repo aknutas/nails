@@ -2,7 +2,7 @@ nails
 =====
 
 **Network Analysis Interface for Literature Studies**  
-by _Juho Salminen, Arash Hajikhani and Antti Knutas_  
+by _Juho Salminen, Antti Knutas and Arash Hajikhani_  
 at _Lappeenranta University of Technology_
 
 What Is It?
@@ -19,7 +19,7 @@ Science!
 ----
 The basic design and bibliometric principles of the system have been published in a research article:
 
-Antti Knutas, Arash Hajikhani, Juho Salminen, Jouni Ikonen, and Jari Porras. 2015. _Cloud-Based Bibliometric Analysis Service for Systematic Mapping Studies_. In Proceedings of the 16th International Conference on Computer Systems and Technologies (CompSysTech '15). DOI: 10.1145/2812428.2812442
+Antti Knutas, Arash Hajikhani, Juho Salminen, Jouni Ikonen, and Jari Porras. 2015. _Cloud-Based Bibliometric Analysis Service for Systematic Mapping Studies_. In Proceedings of the 16th International Conference on Computer Systems and Technologies (CompSysTech '15). DOI: [10.1145/2812428.2812442](https://doi.org/10.1145/2812428.2812442)
 
 A preprint version of the article is [available for download](http://www.codecamp.fi/lib/exe/fetch.php/wiki/nails-compsystech2015-preprint.pdf) as PDF. The official version is now available at the [ACM Digital Library](http://dl.acm.org/citation.cfm?doid=2812428.2812442).
 
