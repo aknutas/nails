@@ -243,8 +243,8 @@ if (enableTM) {
   
   
   # Add top topics back to the main document and rename toptopic column
-  thetaDFtops <- thetaDF[,c("toptopic", "rowids")]
-  literature <- merge(x = literature, y = thetaDFtops, by="rowids", all.x = TRUE)
+  thetaDFtops <- thetaDF[,c("topicmodelrowids", "toptopic")]
+  literature <- merge(x = literature, y = thetaDFtops, by="topicmodelrowids", all.x = TRUE, all.y = FALSE, sort = FALSE)
   names(literature)[names(literature) == "toptopic"] <- "TopicModelTopic"
   
   # Memory cleanup

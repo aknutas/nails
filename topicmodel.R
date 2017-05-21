@@ -30,10 +30,10 @@ library(dplyr)
 library(stringi)
 
 # Insert rowids for output merging
-literature$rowids <-as.numeric(rownames(literature))
+literature$topicmodelrowids <-as.numeric(rownames(literature))
 
 # Subselect dataframe for processing and drop empty rows
-doctablewt <- literature[,c("DocumentTitle", "Abstract", "rowids")]
+doctablewt <- literature[,c("DocumentTitle", "Abstract", "topicmodelrowids")]
 doctablewt <- doctablewt[!is.na(doctablewt$Abstract), ]
 doctablewt <- doctablewt[!is.na(doctablewt$DocumentTitle), ]
 
@@ -155,7 +155,7 @@ topickeywords <- terms(fit, 10)
 thetaDF <- as.data.frame(posterior(fit)$topics)
 # Add top topics for each document, add rowids for future reference
 thetaDF$toptopic <- colnames(thetaDF)[max.col(thetaDF,ties.method="first")]
-thetaDF$rowids <- doctablewt$rowids
+thetaDF$topicmodelrowids <- doctablewt$topicmodelrowids
 
 # Memory cleanup
 rm(data)
