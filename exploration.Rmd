@@ -72,7 +72,8 @@ yearDF <- as.data.frame(yearTable)              # Turn to dataframe
 names(yearDF) <- c("Year", "Freq")              # Fix column names
 
 # Merge to dataframe of total publication numbers (years)
-yearDF <- merge(yearDF, years, by.x = "Year", by.y = "Year")
+yearDF <- merge(yearDF, years, by.x = "Year", by.y = "Year", 
+                all.x = TRUE)
 yearDF$Year <- as.numeric(as.character(yearDF$Year))    # factor to numeric
 # Calculate published articles per total articles by year
 yearDF$Fraction <- yearDF$Freq / yearDF$Records
