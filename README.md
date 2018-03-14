@@ -53,8 +53,9 @@ Requirements
 ----
 For now the project verifiedly works on R version 3.3.3 and RStudio 1.0.136.
 
-You need the following R packages (tested 13.3.2017): splitstackshape, reshape, plyr, stringr, tm, SnowballC, lda, LDAvis, igraph
-For the LDA topicmodeling you need the following packages: stm, tm, topicmodels, dplyr, stringi
+You need the following R packages (tested 13.3.2017): splitstackshape, reshape, plyr, stringr, tm, SnowballC, lda, LDAvis, igraph, ggplot2 (also "knitr" separately installed if not using RStudio)
+
+For the LDA topic modeling feature you need the following packages: stm, tm, topicmodels, dplyr, stringi
 
 We are open source and free software
 ----
