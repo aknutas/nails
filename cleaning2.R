@@ -74,33 +74,29 @@ enableTM <- TRUE
 #' @param fix_names Should field tags be changed to field names?
 #' @return A data frame
 read_wos_folder <- function(filepath, fix_names = TRUE) {
-    all_files <- list.files(filepath, pattern = ".txt", full.names = TRUE)
-    # data_sample <- read.delim2(all_files[1], fileEncoding = "UTF-16",
-    #                            quote = "", row.names=NULL,
-    #                            header = FALSE,
-    #                            stringsAsFactors = FALSE,
-    #                            nrows = 10)
-    # colindex <- !is.na(data_sample[1, ])
-    # data_names <- as.character(data_sample[1, colindex])
-    
-    con <- file(all_files[1], "r")
-    data_names = readLines(con, n = 1)
-    data_names <- stringr::str_split(data_names, "\t", simplify = TRUE)
-    close(con)
-    
-    df <- plyr::ldply(all_files, data.table::fread,
-                      skip = 1)
-    
-    df[, c(ncol(df)) := NULL ]
-    names(df) <- data_names
-    df <- as.data.frame(df)
-    
-    df <- df[!duplicated(df), ]
-    
-    if(fix_names) {
-        names(df) <- fix_column_names(names(df))
-    }
-    return(df)
+  all_files <- list.files(filepath, pattern = ".txt", full.names = TRUE)
+  data_sample <- read.delim2(all_files[1], fileEncoding = "UTF-16",
+                             quote = "", row.names=NULL,
+                             header = FALSE,
+                             stringsAsFactors = FALSE,
+                             nrows = 10)
+  colindex <- !is.na(data_sample[1, ])
+  data_names <- as.character(data_sample[1, colindex])
+  
+  df <- plyr::ldply(all_files, read.delim2, fileEncoding="UTF-16",
+                    quote="", row.names=NULL,
+                    header = FALSE,
+                    stringsAsFactors = FALSE,
+                    skip = 1)
+  
+  df <- df[, colindex]
+  names(df) <- data_names
+  df <- df[!duplicated(df), ]
+  
+  if(fix_names) {
+    names(df) <- fix_column_names(names(df))
+  }
+  return(df)
 }
 
 literature <- read_wos_folder("input", fix_names = FALSE)
