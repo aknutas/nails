@@ -3,17 +3,21 @@ nails
 
 **Network Analysis Interface for Literature Studies**  
 by _Juho Salminen, Antti Knutas and Arash Hajikhani_  
-at _Lappeenranta University of Technology_
+at _LUT University_
+
+Disclaimer
+----
+This system is no longer under active development and the developers have moved on to new research projects. Since Web of Science keeps changing their output format and R library function call syntaxes vary with new versions, this software package might not work for you out of the box. The system is open source and if you'd like to fix some aspects of it, we accept pull requests. If you are looking for something simple to use, consider looking at actively maintained systems, such as [Bibliometrix](https://www.bibliometrix.org/).
 
 What Is It?
 ----
 This site shares our experiments and tools for performing Social Network Analysis (SNA) on citation data. As the amount of publications grows on any given field, automatic tools for this sort of analysis are becoming increasingly important prior to starting research on new fields.
 
-SNA is an interesting way for researchers to map large datasets and get insights from new angles. The steps for downloading data from Web of Knowledge and using our tools to process it are detailed below. The set of tools which are required to perform the analyses are free and need a minimum amount of installation. Furthermore, there is a web-based analysis server [HAMMER](http://hammer.nailsproject.net) available so that you can process the data without needing to do any installation or manual processing steps.
+SNA is an interesting way for researchers to map large datasets and get insights from new angles. The steps for downloading data from Web of Knowledge and using our tools to process it are detailed below (though do see the disclaimer above).
 
 The project files are available as open source here in our [Github repository](https://github.com/aknutas/nails). If you link or refer to us, please link to our [project page](http://aknutas.github.io/nails/).
 
-We are working on an alternative, [R package version](https://github.com/aknutas/nails-package) for use by R programmers. For now the project is a work in progress and not fully usable.
+We are working on an alternative, [R package version](https://github.com/aknutas/nails-package) for use by R programmers.
 
 Science!
 ----
