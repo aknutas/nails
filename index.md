@@ -2,6 +2,9 @@
 by _[Juho Salminen](https://twitter.com/Juho_Salminen), [Antti Knutas](https://twitter.com/aknutas) and [Arash Hajikhani](https://twitter.com/arash_hajikhani)_  
 at _LUT University_
 
+## Disclaimer
+This system is no longer under active development and the developers have moved on to new research projects. Since Web of Science keeps changing their output format and R library function call syntaxes vary with new versions, this software package might not work for you out of the box. The system is open source and if you'd like to fix some aspects of it, we accept pull requests. If you are looking for something simple to use, consider looking at actively maintained systems, such as [Bibliometrix](https://www.bibliometrix.org/).
+
 ## What Is It?
 This site shares our experiments and tools for performing statistical and Social Network Analysis (SNA) on citation data. SNA is a new way for researchers to map large datasets and get insights from new angles by analyzing connections between articles. As the amount of publications grows on any given field, automatic tools for this sort of analysis are becoming increasingly important prior to starting research on new fields. _nails_ also provides useful data when performing systematic mapping studies in scientific literature.
 
